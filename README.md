@@ -1,5 +1,10 @@
 # dkstudio RAG Data Generator
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-▶%20Open-cc9966?style=for-the-badge)](https://dkstudio-jp.github.io/rag-data-generator/rag-data-generator.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-7a9085?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Privacy First](https://img.shields.io/badge/Privacy-Local%20Only-5b7d73?style=for-the-badge)](#-privacy-first)
+[![No Server](https://img.shields.io/badge/Server-Not%20Required-444?style=for-the-badge)](#-installation)
+
 **For Personal AI Operating System (Personal AI OS)**
 
 A privacy-first, browser-only tool that transforms any text into structured RAG (Retrieval-Augmented Generation) data — ready for AnythingLLM, LM Studio, Ollama, and other Personal AI OS environments.
@@ -47,8 +52,7 @@ This tool was designed with privacy as a core principle — not an afterthought.
 - **Privacy Mode** — toggle ON to auto-delete everything when you close the tab
 - **Clear All button** — removes all data, API keys, and cached models instantly
 
-> ⚠️ If you are processing personal or sensitive data, please use the **Clear All** button after use.
-> dkstudio accepts no responsibility for any damages arising from use of this service.
+> ⚠️ If you are processing personal or sensitive data, please use the **Clear All** button after use. dkstudio accepts no responsibility for any damages arising from use of this service.
 
 ---
 
@@ -120,18 +124,18 @@ Select output format and download your RAG data.
 No installation required. This is a single self-contained HTML file.
 
 **Option A — Direct use**
-Download `rag-generator.html` and open it in any modern browser.
+Download `rag-data-generator.html` and open it in any modern browser.
 
 **Option B — Host on your server**
 Upload to any web server. No backend required.
 ```
 /your-site/
-  rag-generator.html   ← drop it anywhere
+  rag-data-generator.html   ← drop it anywhere
 ```
 
 **Option C — GitHub Pages**
 Fork this repo and enable GitHub Pages. Live at:
-`https://dkstudio-jp.github.io/rag-data-generator/rag-generator.html`
+`https://yourusername.github.io/rag-data-generator/rag-data-generator.html`
 
 ---
 
@@ -139,8 +143,8 @@ Fork this repo and enable GitHub Pages. Live at:
 
 ```
 rag-data-generator/
-├── rag-generator.html    # Complete application (single file)
-└── README.md             # This file
+├── rag-data-generator.html    # Complete application (single file)
+└── README.md                  # This file
 ```
 
 Everything is in one file. No build step, no dependencies, no Node.js.
@@ -193,6 +197,7 @@ RAG data generated with dkstudio RAG Data Generator — MIT License
 
 ## 🌐 Links
 
+- **Live Demo** — [dkstudio-jp.github.io/rag-data-generator](https://dkstudio-jp.github.io/rag-data-generator/rag-data-generator.html)
 - **Website** — [dkstudio.jp](https://dkstudio.jp)
 - **GitHub** — [github.com/dkstudio-jp](https://github.com/dkstudio-jp)
 
