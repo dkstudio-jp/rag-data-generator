@@ -1,0 +1,161 @@
+{
+  "version": "2026.05",
+  "updated": "2026-05-20",
+  "source": "github.com/dkstudio-jp/rag-data-generator",
+  "note": "Community-maintained model list. Submit a PR to add or update models.",
+  "models": [
+    {
+      "id": "claude-opus-4-7",
+      "provider": "anthropic",
+      "name": "Claude Opus 4.7",
+      "inP": 5.00, "outP": 25.0,
+      "speed": 58, "quality": 99,
+      "embed": "Voyage AI",
+      "tags": ["Best Quality", "Complex"],
+      "desc": { "ja": "品質最優先。高付加価値コンテンツ向け。", "en": "Top quality. For high-value content." }
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "provider": "anthropic",
+      "name": "Claude Sonnet 4.6",
+      "inP": 3.00, "outP": 15.0,
+      "speed": 74, "quality": 92,
+      "embed": "Voyage AI",
+      "tags": ["Balanced", "Production"],
+      "desc": { "ja": "品質×コストのベスト。本番の定番。", "en": "Best quality-cost balance." }
+    },
+    {
+      "id": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "name": "Claude Haiku 4.5",
+      "inP": 1.00, "outP": 5.00,
+      "speed": 88, "quality": 82,
+      "embed": "Voyage AI",
+      "tags": ["Fast", "Affordable"],
+      "desc": { "ja": "Claude系最安。日本語に強い。", "en": "Most affordable Claude. Great Japanese support." }
+    },
+    {
+      "id": "gpt-4o",
+      "provider": "openai",
+      "name": "GPT-4o",
+      "inP": 2.50, "outP": 10.0,
+      "speed": 73, "quality": 91,
+      "embed": "text-embedding-3-large",
+      "tags": ["High Performance", "Versatile"],
+      "desc": { "ja": "GPT系最高峰。既存システムと連携しやすい。", "en": "Top GPT model. Easy system integration." }
+    },
+    {
+      "id": "gpt-4o-mini",
+      "provider": "openai",
+      "name": "GPT-4o mini",
+      "inP": 0.15, "outP": 0.60,
+      "speed": 91, "quality": 78,
+      "embed": "text-embedding-3-small",
+      "tags": ["Best Value", "High Volume"],
+      "desc": { "ja": "OpenAI最安。大量処理に最適。", "en": "OpenAI's most affordable. Great for bulk." }
+    },
+    {
+      "id": "o4-mini",
+      "provider": "openai",
+      "name": "o4-mini",
+      "inP": 1.10, "outP": 4.40,
+      "speed": 65, "quality": 94,
+      "embed": "text-embedding-3-small",
+      "tags": ["Reasoning", "Math/Code"],
+      "desc": { "ja": "推論特化。複雑タスクに強い。", "en": "Reasoning model. Complex logic tasks." }
+    },
+    {
+      "id": "o3",
+      "provider": "openai",
+      "name": "o3",
+      "inP": 10.0, "outP": 40.0,
+      "speed": 45, "quality": 99,
+      "embed": "text-embedding-3-large",
+      "tags": ["Top Reasoning", "Research"],
+      "desc": { "ja": "推論系の頂点。研究・高度分析向け。", "en": "Pinnacle reasoning. Research use." }
+    },
+    {
+      "id": "gemini-2-5-pro",
+      "provider": "google",
+      "name": "Gemini 2.5 Pro",
+      "inP": 1.25, "outP": 10.0,
+      "speed": 70, "quality": 95,
+      "embed": "text-embedding-004",
+      "tags": ["High Quality", "1M Context"],
+      "desc": { "ja": "Google最上位。100万token対応。", "en": "Google flagship. 1M token context." }
+    },
+    {
+      "id": "gemini-2-5-flash",
+      "provider": "google",
+      "name": "Gemini 2.5 Flash",
+      "inP": 0.30, "outP": 2.50,
+      "speed": 86, "quality": 85,
+      "embed": "text-embedding-004",
+      "tags": ["Balanced", "Fast"],
+      "desc": { "ja": "速度と品質のバランス。", "en": "Speed and quality balance." }
+    },
+    {
+      "id": "gemini-flash-lite",
+      "provider": "google",
+      "name": "Gemini Flash-Lite",
+      "inP": 0.10, "outP": 0.40,
+      "speed": 96, "quality": 72,
+      "embed": "text-embedding-004",
+      "tags": ["Cheapest", "Ultra Fast"],
+      "desc": { "ja": "最安値。常時稼働サービスに。", "en": "Lowest cost. For always-on services." }
+    },
+    {
+      "id": "mistral-large",
+      "provider": "mistral",
+      "name": "Mistral Large",
+      "inP": 2.00, "outP": 6.00,
+      "speed": 76, "quality": 88,
+      "embed": "mistral-embed",
+      "tags": ["EU Based", "GDPR"],
+      "desc": { "ja": "欧州製。GDPR対応用途に。", "en": "EU-based. GDPR compliant." }
+    },
+    {
+      "id": "mistral-small",
+      "provider": "mistral",
+      "name": "Mistral Small",
+      "inP": 0.20, "outP": 0.60,
+      "speed": 86, "quality": 75,
+      "embed": "mistral-embed",
+      "tags": ["Affordable", "EU Based"],
+      "desc": { "ja": "Mistral系最安。軽量タスクに。", "en": "Most affordable Mistral." }
+    },
+    {
+      "id": "llama3-3-70b",
+      "provider": "meta",
+      "name": "Llama 3.3 70B",
+      "inP": 0, "outP": 0,
+      "speed": 75, "quality": 84,
+      "embed": "nomic-embed-text",
+      "tags": ["Free", "Open Source"],
+      "local": true,
+      "desc": { "ja": "Meta製最高峰。Ollama経由で利用可能。", "en": "Meta's best. Available via Ollama." }
+    },
+    {
+      "id": "llama3-2-3b",
+      "provider": "meta",
+      "name": "Llama 3.2 3B",
+      "inP": 0, "outP": 0,
+      "speed": 95, "quality": 68,
+      "embed": "nomic-embed-text",
+      "tags": ["Ultra Light", "Free"],
+      "local": true,
+      "desc": { "ja": "3Bパラメータ。ローカルで快適動作。", "en": "3B params. Smooth on local hardware." }
+    },
+    {
+      "id": "qwen2-5-14b",
+      "provider": "meta",
+      "name": "Qwen 2.5 14B",
+      "inP": 0, "outP": 0,
+      "speed": 82, "quality": 82,
+      "embed": "nomic-embed-text",
+      "tags": ["Free", "Strong Japanese"],
+      "local": true,
+      "desc": { "ja": "日本語・中国語に特に強い。", "en": "Particularly strong in Japanese & Chinese." }
+    }
+  ]
+}

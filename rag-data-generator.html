@@ -1,25 +1,14 @@
 <!--
-  dkstudio RAG Data Generator
+  dkstudio RAG Data Generator v2.0.0
   MIT License — Copyright (c) 2026 dkstudio (dkstudio.jp)
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+  github.com/dkstudio-jp/rag-data-generator
 -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RAG Data Generator — dkstudio</title>
+<title>RAG Data Generator v2 — dkstudio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -35,99 +24,112 @@ html,body{height:100%;background:var(--dk-bg);color:var(--dk-text);font-family:-
 input,textarea,select{font-family:inherit;}
 
 .app{display:grid;grid-template-rows:52px 1fr 28px;height:100vh;}
-.hdr{display:flex;align-items:center;gap:9px;padding:0 16px;border-bottom:1px solid var(--dk-border);background:var(--dk-bg2);flex-shrink:0;}
+.hdr{display:flex;align-items:center;gap:7px;padding:0 12px;border-bottom:1px solid var(--dk-border);background:var(--dk-bg2);flex-wrap:nowrap;min-width:0;}
 .hdr-logo{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dk-main);}
 .hdr-logo em{color:var(--dk-gold);font-style:normal;}
 .hdiv{width:1px;height:14px;background:var(--dk-border2);flex-shrink:0;}
-.hdr-svc{font-size:11px;color:var(--dk-text3);letter-spacing:.04em;white-space:nowrap;}
-.hdr-tag{font-size:9px;padding:2px 8px;border:1px solid var(--dk-border2);border-radius:10px;color:var(--dk-text2);letter-spacing:.04em;white-space:nowrap;}
-
-/* Language toggle */
+.hdr-svc{font-size:11px;color:var(--dk-text3);white-space:nowrap;}
+.hdr-ver{font-size:9px;padding:2px 6px;border-radius:4px;background:var(--dk-bg4);color:var(--dk-gold);font-weight:500;}
+.hdr-tag{font-size:9px;padding:2px 8px;border:1px solid var(--dk-border2);border-radius:10px;color:var(--dk-text2);white-space:nowrap;}
+@media(max-width:900px){.hdr-tag{display:none;}}
 .lang-sw{display:flex;border:1px solid var(--dk-border2);border-radius:6px;overflow:hidden;flex-shrink:0;}
 .lang-btn{padding:3px 9px;font-size:10px;font-weight:500;background:none;border:none;color:var(--dk-text3);cursor:pointer;transition:all .12s;}
 .lang-btn.active{background:var(--dk-accent);color:#fff;}
-.lang-btn:not(.active):hover{background:var(--dk-bg4);color:var(--dk-text2);}
-
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:7px;}
-.priv-badge{font-size:9px;padding:2px 8px;border-radius:8px;background:#1a2d20;border:1px solid var(--dk-accent);color:var(--dk-accent);letter-spacing:.04em;white-space:nowrap;}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.priv-badge{font-size:9px;padding:2px 8px;border-radius:8px;background:#1a2d20;border:1px solid var(--dk-accent);color:var(--dk-accent);}
 .priv-badge.pm{background:#1a1a2d;border-color:#9090cc;color:#9090cc;}
-.clear-btn{font-size:10px;padding:3px 10px;border:1px solid var(--dk-border2);border-radius:5px;background:none;color:var(--dk-text3);cursor:pointer;white-space:nowrap;transition:all .12s;}
-.clear-btn:hover{border-color:var(--d-red);color:var(--d-red);}
-.hdr-db{font-size:10px;color:var(--dk-text3);white-space:nowrap;}
-
-/* Footer */
-.footer{display:flex;align-items:center;justify-content:center;gap:10px;border-top:1px solid var(--dk-border);background:var(--dk-bg2);font-size:10px;color:var(--dk-text3);}
-.footer a{color:var(--dk-text3);text-decoration:none;}
-.footer a:hover{color:var(--dk-gold);}
-
-/* 3-col */
-.cols{display:grid;grid-template-columns:258px 1fr 288px;overflow:hidden;}
-.col{display:flex;flex-direction:column;overflow:hidden;}
-.col-l{border-right:1px solid var(--dk-border);background:var(--dk-bg2);}
-.col-c{background:var(--dk-bg);}
-.col-r{border-left:1px solid var(--dk-border);background:var(--dk-bg2);}
-.ph{padding:11px 13px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;gap:7px;flex-shrink:0;}
-.step{width:17px;height:17px;border-radius:50%;background:var(--dk-accent);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.ph-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--dk-text2);}
-.ph-badge{font-size:9px;padding:1px 7px;border-radius:8px;background:var(--dk-bg4);color:var(--dk-text3);}
-.ph-acts{margin-left:auto;display:flex;gap:5px;}
-.pb{flex:1;overflow-y:auto;padding:10px;}
 .sm-btn{font-size:10px;padding:3px 9px;border:1px solid var(--dk-border2);border-radius:5px;background:none;color:var(--dk-text2);cursor:pointer;white-space:nowrap;transition:all .12s;}
 .sm-btn:hover{border-color:var(--dk-main);color:var(--dk-text);}
 .sm-btn.gold{border-color:var(--dk-gold);color:var(--dk-gold);}
 .sm-btn.gold:hover{background:var(--dk-gold);color:#1a1204;}
+.clear-btn{font-size:10px;padding:3px 10px;border:1px solid var(--dk-border2);border-radius:5px;background:none;color:var(--dk-text3);cursor:pointer;transition:all .12s;}
+.clear-btn:hover{border-color:var(--d-red);color:var(--d-red);}
 
-/* Provider tabs */
-.prov-bar{display:flex;gap:2px;padding:7px 10px;border-bottom:1px solid var(--dk-border);flex-wrap:wrap;flex-shrink:0;}
-.ptab{font-size:10px;padding:3px 8px;border-radius:5px;cursor:pointer;color:var(--dk-text3);transition:all .12s;white-space:nowrap;}
-.ptab:hover{background:var(--dk-bg4);color:var(--dk-text2);}
-.ptab.active{background:var(--dk-accent);color:#fff;}
+.footer{display:flex;align-items:center;justify-content:center;gap:10px;border-top:1px solid var(--dk-border);background:var(--dk-bg2);font-size:10px;color:var(--dk-text3);}
+.footer a{color:var(--dk-text3);text-decoration:none;}.footer a:hover{color:var(--dk-gold);}
 
-/* Ollama bar */
-.ollama-bar{padding:5px 10px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;gap:6px;flex-shrink:0;background:var(--dk-bg3);}
-.pulse{width:5px;height:5px;border-radius:50%;background:var(--dk-text3);flex-shrink:0;}
-.pulse.on{background:var(--s-green);}
-.pulse.off{background:var(--c-orange);}
+.cols{display:grid;grid-template-columns:258px 1fr 300px;overflow:hidden;}
+.col{display:flex;flex-direction:column;overflow:hidden;}
+.col-l{border-right:1px solid var(--dk-border);background:var(--dk-bg2);}
+.col-c{background:var(--dk-bg);}
+.col-r{border-left:1px solid var(--dk-border);background:var(--dk-bg2);}
+.ph{padding:8px 13px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:wrap;}
+.step{width:17px;height:17px;border-radius:50%;background:var(--dk-accent);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ph-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--dk-text2);}
+.ph-badge{font-size:9px;padding:1px 7px;border-radius:8px;background:var(--dk-bg4);color:var(--dk-text3);}
+.ph-acts{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;}
+.ph-acts-full{width:100%;display:flex;gap:4px;padding-top:4px;border-top:1px solid var(--dk-border);margin-top:4px;}
+.pb{flex:1;overflow-y:auto;padding:10px;}
+
+/* Model source bar */
+.src-bar{padding:6px 10px;border-bottom:1px solid var(--dk-border);background:var(--dk-bg3);display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.src-item{font-size:10px;display:flex;align-items:center;gap:4px;color:var(--dk-text3);}
+.src-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.src-dot.ok{background:var(--s-green);}
+.src-dot.loading{background:var(--dk-gold);}
+.src-dot.err{background:var(--c-orange);}
+
+/* Comparison selected bar */
+.cmp-bar{padding:6px 10px;border-bottom:1px solid var(--dk-border);background:var(--dk-bg3);flex-shrink:0;}
+.cmp-bar-title{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--dk-text3);margin-bottom:5px;}
+.cmp-chips{display:flex;gap:4px;flex-wrap:wrap;}
+.cmp-chip{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;border:1px solid var(--dk-border2);background:var(--dk-bg4);font-size:10px;color:var(--dk-text2);}
+.cmp-chip.active-gen{border-color:var(--dk-gold);color:var(--dk-gold);background:var(--dk-bg5);}
+.cmp-chip-x{cursor:pointer;color:var(--dk-text3);font-size:12px;line-height:1;}
+.cmp-chip-x:hover{color:var(--d-red);}
+.cmp-empty{font-size:11px;color:var(--dk-text3);}
 
 /* LLM card */
-.llm-card{border:1px solid var(--dk-border);border-radius:7px;padding:10px 11px;margin-bottom:7px;cursor:pointer;transition:border-color .12s,background .12s;}
+.llm-card{border:1px solid var(--dk-border);border-radius:7px;padding:9px 11px;margin-bottom:7px;cursor:pointer;transition:border-color .12s,background .12s;}
 .llm-card:hover{border-color:var(--dk-main);background:var(--dk-bg3);}
-.llm-card.sel{border-color:var(--dk-gold);background:var(--dk-bg3);}
-.lc-top{display:flex;align-items:flex-start;gap:7px;margin-bottom:6px;}
+.llm-card.in-cmp{border-color:var(--dk-accent);background:var(--dk-bg3);}
+.llm-card.active-gen{border-color:var(--dk-gold);background:var(--dk-bg3);}
+.lc-top{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px;}
 .lc-name{font-size:12px;font-weight:500;color:var(--dk-text);line-height:1.3;}
 .lc-sub{font-size:10px;color:var(--dk-text3);margin-top:1px;}
 .lc-badge{font-size:8px;padding:1px 5px;border-radius:3px;margin-top:2px;display:inline-block;}
 .b-local{background:var(--dk-bg5);color:var(--dk-accent);}
 .b-custom{background:#2a2a3a;color:#9090cc;}
 .b-live{background:#1a2a1a;color:var(--a-green);}
-.grade{font-size:17px;font-weight:700;flex-shrink:0;line-height:1.1;}
+.b-json{background:#1a2a2a;color:var(--dk-main);}
+.grade{font-size:16px;font-weight:700;flex-shrink:0;line-height:1.1;}
 .grade.S{color:var(--s-green);}
 .grade.A{color:var(--a-green);}
 .grade.B{color:var(--b-amber);}
 .grade.C{color:var(--c-orange);}
-.grade.D{color:var(--d-red);}
 .meter{display:grid;grid-template-columns:40px 1fr 28px;gap:4px;align-items:center;margin-top:3px;}
 .ml{font-size:9px;color:var(--dk-text3);}
 .mt{height:2px;background:var(--dk-border2);border-radius:1px;overflow:hidden;}
 .mf{height:100%;border-radius:1px;}
 .mv{font-size:9px;color:var(--dk-text3);text-align:right;}
-.lc-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px;}
+.lc-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
 .tag{font-size:9px;padding:1px 5px;border-radius:8px;background:var(--dk-bg4);color:var(--dk-text3);}
-.del-btn{background:none;border:none;color:var(--dk-text3);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;}
+.lc-actions{display:flex;gap:4px;margin-top:6px;}
+.add-cmp-btn{flex:1;font-size:10px;padding:4px;border-radius:5px;border:1px solid var(--dk-border2);background:none;color:var(--dk-text2);cursor:pointer;transition:all .12s;}
+.add-cmp-btn:hover{border-color:var(--dk-accent);color:var(--dk-text);}
+.add-cmp-btn.active{background:var(--dk-accent);border-color:var(--dk-accent);color:#fff;}
+.set-gen-btn{flex:1;font-size:10px;padding:4px;border-radius:5px;border:1px solid var(--dk-border2);background:none;color:var(--dk-text2);cursor:pointer;transition:all .12s;}
+.set-gen-btn:hover{border-color:var(--dk-gold);color:var(--dk-gold);}
+.set-gen-btn.active{background:var(--dk-gold);border-color:var(--dk-gold);color:#1a1204;}
+.del-btn{background:none;border:none;color:var(--dk-text3);cursor:pointer;font-size:13px;padding:0 2px;}
 .del-btn:hover{color:var(--d-red);}
 
-/* Overlays / Modals */
+/* Prov filter */
+.prov-bar{display:flex;gap:2px;padding:6px 10px;border-bottom:1px solid var(--dk-border);flex-wrap:wrap;flex-shrink:0;}
+.ptab{font-size:10px;padding:2px 7px;border-radius:5px;cursor:pointer;color:var(--dk-text3);transition:all .12s;white-space:nowrap;}
+.ptab:hover{background:var(--dk-bg4);color:var(--dk-text2);}
+.ptab.active{background:var(--dk-accent);color:#fff;}
+
+/* Overlay */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
 .overlay.open{display:flex;}
-.modal{background:var(--dk-bg2);border:1px solid var(--dk-border2);border-radius:10px;width:510px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
-.modal-hdr{padding:13px 16px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;gap:8px;}
+.modal{background:var(--dk-bg2);border:1px solid var(--dk-border2);border-radius:10px;width:500px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-hdr{padding:12px 16px;border-bottom:1px solid var(--dk-border);display:flex;align-items:center;gap:8px;}
 .modal-title{font-size:13px;font-weight:600;flex:1;}
 .modal-body{flex:1;overflow-y:auto;padding:15px;}
 .modal-foot{padding:11px 16px;border-top:1px solid var(--dk-border);display:flex;justify-content:flex-end;gap:7px;}
 .close-x{background:none;border:none;color:var(--dk-text3);cursor:pointer;font-size:18px;line-height:1;}
 .close-x:hover{color:var(--dk-text);}
-
-/* Update modal */
 .upd-row{border:1px solid var(--dk-border);border-radius:8px;padding:11px;margin-bottom:9px;}
 .upd-prov{font-size:12px;font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
 .upd-key{display:flex;gap:6px;}
@@ -139,11 +141,26 @@ input,textarea,select{font-family:inherit;}
 .upd-st.loading{color:var(--dk-gold);}
 .cors-note{font-size:10px;padding:6px 9px;background:var(--dk-bg4);border-radius:5px;color:var(--dk-text3);margin-top:6px;line-height:1.5;}
 
-/* Add modal */
+/* JSON source modal */
+.json-tabs{display:flex;border-bottom:1px solid var(--dk-border);margin-bottom:12px;}
+.json-tab{flex:1;padding:8px;text-align:center;font-size:11px;cursor:pointer;color:var(--dk-text3);border-bottom:2px solid transparent;transition:all .12s;}
+.json-tab.active{color:var(--dk-text);border-bottom-color:var(--dk-gold);}
+.json-section{display:none;}
+.json-section.active{display:block;}
+.json-input-row{display:flex;gap:6px;margin-bottom:8px;}
+.json-input-row input{flex:1;background:var(--dk-bg3);border:1px solid var(--dk-border2);border-radius:5px;padding:7px 9px;color:var(--dk-text);font-size:12px;outline:none;}
+.json-input-row input:focus{border-color:var(--dk-main);}
+.dropzone{border:1.5px dashed var(--dk-border2);border-radius:8px;padding:28px;text-align:center;color:var(--dk-text3);font-size:12px;cursor:pointer;transition:border-color .12s;}
+.dropzone:hover,.dropzone.drag{border-color:var(--dk-main);color:var(--dk-text2);}
+.json-st{font-size:11px;padding:6px 9px;border-radius:5px;margin-top:8px;display:none;}
+.json-st.ok{display:block;background:#1a2a1a;color:var(--a-green);}
+.json-st.err{display:block;background:#2a1a1a;color:var(--d-red);}
+
+/* Add model form */
 .fg-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 .fg{display:flex;flex-direction:column;gap:4px;}
 .fg label{font-size:10px;color:var(--dk-text2);font-weight:500;letter-spacing:.04em;}
-.fg input,.fg select{background:var(--dk-bg3);border:1px solid var(--dk-border2);border-radius:5px;padding:7px 9px;color:var(--dk-text);font-size:12px;outline:none;}
+.fg input,.fg select{background:var(--dk-bg3);border:1px solid var(--dk-border2);border-radius:5px;padding:6px 9px;color:var(--dk-text);font-size:12px;outline:none;}
 .fg input:focus,.fg select:focus{border-color:var(--dk-main);}
 .fg-full{grid-column:1/-1;}
 .sp{font-size:11px;color:var(--dk-gold);text-align:right;margin-top:2px;}
@@ -161,51 +178,60 @@ textarea:focus{border-color:var(--dk-main);}
 input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 .sl-hint{font-size:10px;color:var(--dk-text3);}
 
-/* Right */
-.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
-.stat{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:7px;padding:8px 9px;}
-.stat-v{font-size:15px;font-weight:500;color:var(--dk-gold);}
+/* Right panel */
+/* Comparison table */
+.cmp-table{margin-bottom:11px;}
+.cmp-table-title{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--dk-text3);margin-bottom:6px;}
+.cmp-model-cols{display:grid;gap:5px;}
+.cmp-model-col{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:7px;padding:8px 10px;cursor:pointer;transition:border-color .12s;}
+.cmp-model-col:hover{border-color:var(--dk-main);}
+.cmp-model-col.active{border-color:var(--dk-gold);}
+.cmc-top{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.cmc-name{font-size:11px;font-weight:500;flex:1;}
+.cmc-grade{font-size:14px;font-weight:700;}
+.cmc-cost{font-size:12px;font-weight:500;color:var(--dk-gold);font-family:monospace;}
+.cmc-bar-wrap{height:4px;background:var(--dk-border2);border-radius:2px;overflow:hidden;margin-top:4px;}
+.cmc-bar{height:100%;border-radius:2px;transition:width .4s ease;}
+.cmc-label{font-size:9px;color:var(--dk-text3);margin-top:3px;display:flex;justify-content:space-between;}
+
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;}
+.stat{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:7px;padding:7px 8px;}
+.stat-v{font-size:14px;font-weight:500;color:var(--dk-gold);}
 .stat-l{font-size:9px;color:var(--dk-text3);margin-top:1px;}
-.copas{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:7px;padding:10px;margin-bottom:10px;}
-.copas-t{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--dk-text3);margin-bottom:7px;}
-.copas-row{display:flex;align-items:flex-start;gap:9px;}
-.copas-g{font-size:30px;font-weight:700;line-height:1;}
-.copas-desc{font-size:11px;color:var(--dk-text2);line-height:1.5;}
-.copas-meta{font-size:10px;color:var(--dk-text3);margin-top:5px;line-height:1.6;}
 .chunk-c{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:6px;padding:8px;margin-bottom:6px;}
 .chunk-c:nth-child(3n+1){border-left:2px solid var(--dk-accent);}
 .chunk-c:nth-child(3n+2){border-left:2px solid var(--dk-gold);}
 .chunk-c:nth-child(3n+3){border-left:2px solid var(--dk-main);}
 .chunk-n{font-size:9px;color:var(--dk-text3);margin-bottom:2px;}
-.chunk-t{font-size:11px;color:var(--dk-text2);line-height:1.5;max-height:46px;overflow:hidden;}
+.chunk-t{font-size:11px;color:var(--dk-text2);line-height:1.5;max-height:44px;overflow:hidden;}
 .chunk-s{font-size:9px;color:var(--dk-text3);margin-top:4px;}
-.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:9px;}
-.fmt-btn{padding:6px 8px;border:1px solid var(--dk-border);border-radius:6px;background:var(--dk-bg3);color:var(--dk-text2);cursor:pointer;text-align:left;transition:all .12s;}
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;}
+.fmt-btn{padding:5px 7px;border:1px solid var(--dk-border);border-radius:6px;background:var(--dk-bg3);color:var(--dk-text2);cursor:pointer;text-align:left;transition:all .12s;}
 .fmt-btn:hover{border-color:var(--dk-main);color:var(--dk-text);}
 .fmt-btn.active{border-color:var(--dk-gold);background:var(--dk-bg4);color:var(--dk-text);}
 .fmt-name{font-size:11px;font-weight:500;}
 .fmt-desc{font-size:9px;color:var(--dk-text3);}
-.fmt-rec{font-size:8px;padding:1px 5px;border-radius:3px;background:var(--dk-gold);color:#1a1204;font-weight:700;display:inline-block;margin-top:2px;}
-.compat{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
-.compat-b{font-size:9px;padding:1px 6px;border-radius:4px;background:var(--dk-bg4);color:var(--dk-text3);border:1px solid var(--dk-border);}
-.gen-btn{width:100%;padding:13px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.02em;}
+.fmt-rec{font-size:8px;padding:1px 4px;border-radius:3px;background:var(--dk-gold);color:#1a1204;font-weight:700;display:inline-block;margin-top:1px;}
+.compat{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:9px;}
+.compat-b{font-size:9px;padding:1px 5px;border-radius:4px;background:var(--dk-bg4);color:var(--dk-text3);border:1px solid var(--dk-border);}
+.gen-btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;}
 .gen-btn:active{transform:scale(.98);}
 .gen-primary{background:var(--dk-gold);color:#1a1204;}
 .gen-primary:hover{background:var(--dk-gold-d);}
 .gen-primary:disabled{opacity:.4;cursor:not-allowed;}
-.empty-state{text-align:center;padding:22px 14px;color:var(--dk-text3);font-size:11px;line-height:2;}
+.empty-state{text-align:center;padding:18px 14px;color:var(--dk-text3);font-size:11px;line-height:2;}
 
 /* Privacy modal */
-.priv-top{padding:18px 18px 0;text-align:center;}
-.priv-icon{font-size:34px;margin-bottom:7px;}
+.priv-top{padding:16px 18px 0;text-align:center;}
+.priv-icon{font-size:32px;margin-bottom:6px;}
 .priv-h{font-size:15px;font-weight:600;margin-bottom:4px;}
-.priv-block{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:8px;padding:11px;margin-bottom:9px;}
+.priv-block{background:var(--dk-bg3);border:1px solid var(--dk-border);border-radius:8px;padding:10px;margin-bottom:8px;}
 .priv-block-t{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dk-gold);margin-bottom:5px;}
 .priv-block-b{font-size:12px;color:var(--dk-text2);line-height:1.7;}
-.priv-disclaimer{font-size:11px;color:var(--dk-text3);line-height:1.7;padding:9px;border:1px solid var(--dk-border);border-radius:6px;background:var(--dk-bg4);margin-bottom:8px;}
-.priv-foot{padding:13px 18px;border-top:1px solid var(--dk-border);display:flex;flex-direction:column;gap:8px;}
+.priv-disclaimer{font-size:11px;color:var(--dk-text3);line-height:1.7;padding:8px;border:1px solid var(--dk-border);border-radius:6px;background:var(--dk-bg4);margin-bottom:8px;}
+.priv-foot{padding:12px 18px;border-top:1px solid var(--dk-border);display:flex;flex-direction:column;gap:7px;}
 .priv-mode-row{display:flex;align-items:center;gap:8px;justify-content:center;}
-.priv-accept{background:var(--dk-gold);color:#1a1204;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;width:100%;}
+.priv-accept{background:var(--dk-gold);color:#1a1204;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;width:100%;}
 .priv-accept:hover{background:var(--dk-gold-d);}
 .toggle{position:relative;width:34px;height:18px;flex-shrink:0;}
 .toggle input{opacity:0;width:0;height:0;position:absolute;}
@@ -222,48 +248,61 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 <div class="hdr">
   <div class="hdr-logo">dk<em>studio</em></div>
   <div class="hdiv"></div>
-  <div class="hdr-svc" data-i18n="hdr_service">RAG Data Generator</div>
-  <div class="hdr-tag" data-i18n="hdr_tag">For Personal AI OS</div>
+  <div class="hdr-svc">RAG Data Generator</div>
+  <div class="hdr-ver">v2.0.0</div>
+  <div class="hdr-tag">For Personal AI OS</div>
   <div class="lang-sw">
     <button class="lang-btn active" id="btn-ja" onclick="setLang('ja')">日本語</button>
     <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
   </div>
-  <div class="hdr-right">
+  <div class="hdr-r">
     <button class="clear-btn" onclick="confirmClear()" data-i18n="hdr_clear">全データ削除</button>
-    <div class="priv-badge" id="priv-badge" data-i18n="hdr_local">🔒 ローカル処理のみ</div>
+    <div class="priv-badge" id="priv-badge">🔒 ローカル処理のみ</div>
     <div class="hdiv"></div>
-    <div class="hdr-db" id="db-status"></div>
+    <div style="font-size:10px;color:var(--dk-text3);" id="db-status"></div>
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="cols">
 
-<!-- LEFT -->
+<!-- LEFT: Model Browser -->
 <div class="col col-l">
   <div class="ph">
     <div class="step">1</div>
     <div class="ph-title" data-i18n="step1">LLMを選ぶ</div>
     <div class="ph-badge" id="model-count">—</div>
-    <div class="ph-acts">
+    <div class="ph-acts-full">
       <button class="sm-btn gold" onclick="openModal('update-overlay')" data-i18n="btn_update">☁ 更新</button>
+      <button class="sm-btn gold" onclick="openModal('json-overlay')">📂 JSON</button>
       <button class="sm-btn" onclick="openModal('add-overlay')" data-i18n="btn_manual">＋ 手動</button>
     </div>
   </div>
-  <div class="prov-bar" id="prov-bar"></div>
-  <div class="ollama-bar">
-    <div class="pulse" id="ol-pulse"></div>
-    <span style="font-size:10px;color:var(--dk-text3);flex:1;" id="ol-status"></span>
-    <button class="sm-btn" onclick="detectOllama()">↻</button>
+
+  <!-- Source status bar -->
+  <div class="src-bar" id="src-bar">
+    <div class="src-item"><div class="src-dot ok"></div><span data-i18n="src_builtin">組み込み</span></div>
+    <div class="src-item" id="src-github"><div class="src-dot loading"></div><span>GitHub...</span></div>
   </div>
+
+  <!-- Comparison chips -->
+  <div class="cmp-bar">
+    <div class="cmp-bar-title" data-i18n="cmp_title">比較中のモデル（最大4件）</div>
+    <div class="cmp-chips" id="cmp-chips">
+      <span class="cmp-empty" data-i18n="cmp_empty">モデルを選んで「比較追加」を押してください</span>
+    </div>
+  </div>
+
+  <!-- Provider filter -->
+  <div class="prov-bar" id="prov-bar"></div>
+
   <div class="pb" id="llm-list"></div>
 </div>
 
 <!-- CENTER -->
 <div class="col col-c">
-  <div class="ph">
-    <div class="step">2</div>
-    <div class="ph-title" data-i18n="step2">テキスト入力 &amp; チャンク設定</div>
+  <div class="ph" style="flex-wrap:nowrap;">
+    <div class="step" style="flex-shrink:0;">2</div>
+    <div class="ph-title" data-i18n="step2" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">テキスト入力 &amp; チャンク設定</div>
   </div>
   <div class="pb">
     <div class="sec">
@@ -274,26 +313,17 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
     <div class="sec">
       <div class="sec-label" data-i18n="sec_chunk">チャンク設定</div>
       <div class="sl-group">
-        <div class="sl-row">
-          <span class="sl-name" data-i18n="sl_chunk">チャンクサイズ</span>
-          <span class="sl-val"><span id="sv-cs">400</span><span data-i18n="unit_chars">文字</span></span>
-        </div>
+        <div class="sl-row"><span class="sl-name" data-i18n="sl_chunk">チャンクサイズ</span><span class="sl-val"><span id="sv-cs">400</span><span data-i18n="unit_chars">文字</span></span></div>
         <input type="range" id="sl-cs" min="100" max="1500" step="50" value="400" oninput="onSlide()">
         <div class="sl-hint" data-i18n="sl_chunk_hint">小 → 精密な検索 ／ 大 → 文脈を広く保持</div>
       </div>
       <div class="sl-group">
-        <div class="sl-row">
-          <span class="sl-name" data-i18n="sl_overlap">オーバーラップ</span>
-          <span class="sl-val"><span id="sv-ov">50</span><span data-i18n="unit_chars">文字</span></span>
-        </div>
+        <div class="sl-row"><span class="sl-name" data-i18n="sl_overlap">オーバーラップ</span><span class="sl-val"><span id="sv-ov">50</span><span data-i18n="unit_chars">文字</span></span></div>
         <input type="range" id="sl-ov" min="0" max="300" step="10" value="50" oninput="onSlide()">
         <div class="sl-hint" data-i18n="sl_overlap_hint">チャンク間の重複（前後文脈の連続性）</div>
       </div>
       <div class="sl-group">
-        <div class="sl-row">
-          <span class="sl-name" data-i18n="sl_topk">検索上限 top-k</span>
-          <span class="sl-val"><span id="sv-tk">5</span><span data-i18n="unit_items">件</span></span>
-        </div>
+        <div class="sl-row"><span class="sl-name" data-i18n="sl_topk">検索上限 top-k</span><span class="sl-val"><span id="sv-tk">5</span><span data-i18n="unit_items">件</span></span></div>
         <input type="range" id="sl-tk" min="1" max="20" step="1" value="5" oninput="onSlide()">
         <div class="sl-hint" data-i18n="sl_topk_hint">回答生成時に参照するチャンク数</div>
       </div>
@@ -303,23 +333,31 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 
 <!-- RIGHT -->
 <div class="col col-r">
-  <div class="ph">
-    <div class="step">3</div>
-    <div class="ph-title" data-i18n="step3">コスパ確認 &amp; 生成</div>
+  <div class="ph" style="flex-wrap:nowrap;">
+    <div class="step" style="flex-shrink:0;">3</div>
+    <div class="ph-title" data-i18n="step3" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">コスパ比較 &amp; 生成</div>
   </div>
   <div class="pb">
     <div class="stat-row">
       <div class="stat"><div class="stat-v" id="s-chunks">0</div><div class="stat-l" data-i18n="stat_chunks">チャンク数</div></div>
       <div class="stat"><div class="stat-v" id="s-chars">0</div><div class="stat-l" data-i18n="stat_chars">総文字数</div></div>
-      <div class="stat"><div class="stat-v" id="s-cost">—</div><div class="stat-l" data-i18n="stat_cost">Emb.費用</div></div>
+      <div class="stat"><div class="stat-v" id="s-cost">—</div><div class="stat-l" data-i18n="stat_cost">生成コスト</div></div>
     </div>
-    <div class="copas">
-      <div class="copas-t" data-i18n="copas_title">コスパ採点</div>
-      <div id="copas-inner"></div>
+
+    <!-- Comparison table -->
+    <div class="cmp-table">
+      <div class="cmp-table-title" data-i18n="cmp_table_title">モデル別コスト比較（クリックで生成モデル選択）</div>
+      <div class="cmp-model-cols" id="cmp-model-cols">
+        <div class="empty-state" data-i18n="cmp_table_empty">左パネルでモデルを比較追加してください</div>
+      </div>
     </div>
-    <div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--dk-text3);margin-bottom:6px;" data-i18n="preview_label">チャンクプレビュー</div>
+
+    <!-- Chunk preview -->
+    <div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--dk-text3);margin-bottom:5px;" data-i18n="preview_label">チャンクプレビュー</div>
     <div id="chunk-preview"></div>
-    <div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--dk-text3);margin:11px 0 6px;" data-i18n="fmt_label">出力フォーマット</div>
+
+    <!-- Format -->
+    <div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--dk-text3);margin:10px 0 5px;" data-i18n="fmt_label">出力フォーマット</div>
     <div class="fmt-grid" id="fmt-grid"></div>
     <div class="compat" id="compat-apps"></div>
     <button class="gen-btn gen-primary" id="gen-btn" onclick="doGenerate()" disabled>▶</button>
@@ -330,147 +368,119 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 
 <!-- FOOTER -->
 <div class="footer">
-  <span>© dkstudio RAG Data Generator</span>
+  <span>© dkstudio RAG Data Generator v2.0.0</span>
   <span>·</span>
-  <a href="https://github.com/dkstudio-jp" target="_blank">GitHub</a>
+  <a href="https://github.com/dkstudio-jp/rag-data-generator" target="_blank">GitHub</a>
   <span>·</span>
   <span>MIT License</span>
   <span>·</span>
   <a href="https://dkstudio.jp" target="_blank">dkstudio.jp</a>
 </div>
 
-</div><!-- .app -->
+</div>
 
 <!-- UPDATE MODAL -->
 <div class="overlay" id="update-overlay" onclick="bgClose(event,'update-overlay')">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <div class="modal-title" data-i18n="upd_title">☁ クラウドモデルを更新</div>
-      <button class="close-x" onclick="closeModal('update-overlay')">×</button>
-    </div>
+    <div class="modal-hdr"><div class="modal-title">☁ クラウドモデルを更新</div><button class="close-x" onclick="closeModal('update-overlay')">×</button></div>
     <div class="modal-body">
       <div style="font-size:11px;color:var(--dk-text3);margin-bottom:13px;line-height:1.7;" data-i18n="upd_note"></div>
-      <!-- Anthropic -->
-      <div class="upd-row">
-        <div class="upd-prov"><span style="color:#cc785c;">●</span> Anthropic <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#2a1a14;color:#cc785c;">CORS</span></div>
-        <div class="cors-note" data-i18n="upd_anthropic_note"></div>
-        <div class="upd-st" id="status-anthropic" data-i18n="upd_curated"></div>
-      </div>
-      <!-- OpenAI -->
-      <div class="upd-row">
-        <div class="upd-prov"><span style="color:#10a37f;">●</span> OpenAI</div>
-        <div class="upd-key">
-          <input type="password" id="key-openai" placeholder="sk-..." oninput="saveKey('openai',this.value)">
-          <button class="sm-btn gold" onclick="fetchOpenAI()" data-i18n="upd_fetch">取得</button>
-        </div>
-        <div class="upd-st" id="status-openai"></div>
-      </div>
-      <!-- Google -->
-      <div class="upd-row">
-        <div class="upd-prov"><span style="color:#4285f4;">●</span> Google</div>
-        <div class="upd-key">
-          <input type="password" id="key-google" placeholder="AIza..." oninput="saveKey('google',this.value)">
-          <button class="sm-btn gold" onclick="fetchGoogle()" data-i18n="upd_fetch">取得</button>
-        </div>
-        <div class="upd-st" id="status-google"></div>
-      </div>
-      <!-- Mistral -->
-      <div class="upd-row">
-        <div class="upd-prov"><span style="color:#f97316;">●</span> Mistral</div>
-        <div class="upd-key">
-          <input type="password" id="key-mistral" placeholder="..." oninput="saveKey('mistral',this.value)">
-          <button class="sm-btn gold" onclick="fetchMistral()" data-i18n="upd_fetch">取得</button>
-        </div>
-        <div class="upd-st" id="status-mistral"></div>
-        <div class="cors-note" data-i18n="upd_cors_note"></div>
-      </div>
+      <div class="upd-row"><div class="upd-prov"><span style="color:#cc785c;">●</span> Anthropic <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#2a1a14;color:#cc785c;">CORS</span></div><div class="cors-note" data-i18n="upd_anthropic_note"></div><div class="upd-st" id="status-anthropic" data-i18n="upd_curated"></div></div>
+      <div class="upd-row"><div class="upd-prov"><span style="color:#10a37f;">●</span> OpenAI</div><div class="upd-key"><input type="password" id="key-openai" placeholder="sk-..." oninput="saveKey('openai',this.value)"><button class="sm-btn gold" onclick="fetchOpenAI()" data-i18n="upd_fetch">取得</button></div><div class="upd-st" id="status-openai"></div></div>
+      <div class="upd-row"><div class="upd-prov"><span style="color:#4285f4;">●</span> Google</div><div class="upd-key"><input type="password" id="key-google" placeholder="AIza..." oninput="saveKey('google',this.value)"><button class="sm-btn gold" onclick="fetchGoogle()" data-i18n="upd_fetch">取得</button></div><div class="upd-st" id="status-google"></div></div>
+      <div class="upd-row"><div class="upd-prov"><span style="color:#f97316;">●</span> Mistral</div><div class="upd-key"><input type="password" id="key-mistral" placeholder="..." oninput="saveKey('mistral',this.value)"><button class="sm-btn gold" onclick="fetchMistral()" data-i18n="upd_fetch">取得</button></div><div class="upd-st" id="status-mistral"></div><div class="cors-note" data-i18n="upd_cors_note"></div></div>
       <button class="sm-btn gold" style="width:100%;padding:9px;font-size:12px;margin-top:4px;" onclick="fetchAll()" data-i18n="upd_all">☁ すべて更新</button>
     </div>
-    <div class="modal-foot">
-      <button class="sm-btn" onclick="closeModal('update-overlay')" data-i18n="upd_close">閉じる</button>
-    </div>
+    <div class="modal-foot"><button class="sm-btn" onclick="closeModal('update-overlay')" data-i18n="upd_close">閉じる</button></div>
   </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- JSON SOURCE MODAL -->
+<div class="overlay" id="json-overlay" onclick="bgClose(event,'json-overlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><div class="modal-title">📂 モデルリストを読み込む</div><button class="close-x" onclick="closeModal('json-overlay')">×</button></div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--dk-text3);margin-bottom:12px;line-height:1.7;">
+        外部のmodels.jsonを読み込んでモデルリストを差し替え・追加できます。<br>
+        URLまたはファイルで指定してください。
+      </div>
+      <div class="json-tabs">
+        <div class="json-tab active" onclick="switchJsonTab('url')">🔗 URLから読み込む</div>
+        <div class="json-tab" onclick="switchJsonTab('file')">📁 ファイルをアップロード</div>
+        <div class="json-tab" onclick="switchJsonTab('github')">⭐ GitHub公式リスト</div>
+      </div>
+      <!-- URL tab -->
+      <div class="json-section active" id="json-tab-url">
+        <div style="font-size:11px;color:var(--dk-text3);margin-bottom:8px;">models.jsonのURLを入力してください</div>
+        <div class="json-input-row">
+          <input type="text" id="json-url-input" placeholder="https://example.com/models.json">
+          <button class="sm-btn gold" onclick="loadFromUrl()">読み込む</button>
+        </div>
+        <div class="json-st" id="json-url-st"></div>
+      </div>
+      <!-- File tab -->
+      <div class="json-section" id="json-tab-file">
+        <div class="dropzone" id="json-dropzone" onclick="document.getElementById('json-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleFileDrop(event)">
+          <div style="font-size:24px;margin-bottom:8px;">📂</div>
+          models.jsonをドロップ、またはクリックして選択
+        </div>
+        <input type="file" id="json-file-input" accept=".json" style="display:none" onchange="handleFileSelect(this)">
+        <div class="json-st" id="json-file-st"></div>
+      </div>
+      <!-- GitHub tab -->
+      <div class="json-section" id="json-tab-github">
+        <div style="font-size:11px;color:var(--dk-text2);line-height:1.7;margin-bottom:10px;">
+          dkstudioが管理する公式models.jsonを読み込みます。<br>
+          コミュニティがプルリクエストで更新しています。
+        </div>
+        <div style="font-size:11px;padding:8px;background:var(--dk-bg3);border-radius:6px;color:var(--dk-text3);margin-bottom:10px;word-break:break-all;">
+          https://raw.githubusercontent.com/dkstudio-jp/rag-data-generator/main/models.json
+        </div>
+        <button class="sm-btn gold" style="width:100%;padding:8px;" onclick="loadGitHubModels(true)">📥 GitHubから読み込む</button>
+        <div class="json-st" id="json-gh-st"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="sm-btn" onclick="closeModal('json-overlay')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- ADD MODEL MODAL -->
 <div class="overlay" id="add-overlay" onclick="bgClose(event,'add-overlay')">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <div class="modal-title" data-i18n="add_title">＋ モデルを手動で追加</div>
-      <button class="close-x" onclick="closeModal('add-overlay')">×</button>
-    </div>
+    <div class="modal-hdr"><div class="modal-title">＋ モデルを手動で追加</div><button class="close-x" onclick="closeModal('add-overlay')">×</button></div>
     <div class="modal-body">
       <div class="fg-grid">
-        <div class="fg fg-full"><label data-i18n="add_name">モデル名</label><input type="text" id="f-name"></div>
-        <div class="fg"><label data-i18n="add_prov">プロバイダー</label>
-          <select id="f-prov">
-            <option value="custom">Custom</option>
-            <option value="anthropic">Anthropic</option>
-            <option value="openai">OpenAI</option>
-            <option value="google">Google</option>
-            <option value="mistral">Mistral</option>
-            <option value="meta">Meta</option>
-            <option value="ollama">Ollama</option>
-          </select>
-        </div>
-        <div class="fg"><label data-i18n="add_embed">Embedding Model</label><input type="text" id="f-embed" placeholder="text-embedding-..."></div>
-        <div class="fg"><label data-i18n="add_inp">Input Cost ($/MTok)</label><input type="number" id="f-inp" step="0.01" min="0" value="1.00"></div>
-        <div class="fg"><label data-i18n="add_out">Output Cost ($/MTok)</label><input type="number" id="f-out" step="0.01" min="0" value="3.00"></div>
-        <div class="fg fg-full">
-          <label data-i18n="add_speed">Speed Score (0–100)</label>
-          <input type="range" id="f-speed" min="0" max="100" value="75" oninput="document.getElementById('sp-s').textContent=this.value">
-          <div class="sp" id="sp-s">75</div>
-        </div>
-        <div class="fg fg-full">
-          <label data-i18n="add_qual">Quality Score (0–100)</label>
-          <input type="range" id="f-qual" min="0" max="100" value="80" oninput="document.getElementById('sp-q').textContent=this.value">
-          <div class="sp" id="sp-q">80</div>
-        </div>
-        <div class="fg fg-full"><label data-i18n="add_tags">Tags</label><input type="text" id="f-tags"></div>
-        <div class="fg fg-full"><label data-i18n="add_desc">Description</label><input type="text" id="f-desc"></div>
-        <div class="fg"><label data-i18n="add_local">Local?</label>
-          <select id="f-local"><option value="" data-i18n="add_no">いいえ</option><option value="1" data-i18n="add_yes">はい (LOCAL)</option></select>
-        </div>
+        <div class="fg fg-full"><label>モデル名 *</label><input type="text" id="f-name" placeholder="例: My Custom LLM 7B"></div>
+        <div class="fg"><label>プロバイダー</label><select id="f-prov"><option value="custom">Custom</option><option value="anthropic">Anthropic</option><option value="openai">OpenAI</option><option value="google">Google</option><option value="mistral">Mistral</option><option value="meta">Meta</option><option value="ollama">Ollama</option></select></div>
+        <div class="fg"><label>Embeddingモデル</label><input type="text" id="f-embed" placeholder="text-embedding-..."></div>
+        <div class="fg"><label>入力コスト ($/MTok)</label><input type="number" id="f-inp" step="0.01" min="0" value="1.00"></div>
+        <div class="fg"><label>出力コスト ($/MTok)</label><input type="number" id="f-out" step="0.01" min="0" value="3.00"></div>
+        <div class="fg fg-full"><label>速度スコア (0–100) <span class="sp" id="sp-s">75</span></label><input type="range" id="f-speed" min="0" max="100" value="75" oninput="document.getElementById('sp-s').textContent=this.value"></div>
+        <div class="fg fg-full"><label>品質スコア (0–100) <span class="sp" id="sp-q">80</span></label><input type="range" id="f-qual" min="0" max="100" value="80" oninput="document.getElementById('sp-q').textContent=this.value"></div>
+        <div class="fg fg-full"><label>タグ (カンマ区切り)</label><input type="text" id="f-tags" placeholder="高品質, 日本語対応, 無料"></div>
+        <div class="fg fg-full"><label>説明</label><input type="text" id="f-desc" placeholder="このモデルの特徴や用途"></div>
+        <div class="fg"><label>ローカルモデル?</label><select id="f-local"><option value="">いいえ</option><option value="1">はい (LOCAL)</option></select></div>
       </div>
-      <div style="font-size:10px;color:var(--dk-text3);margin-top:9px;" data-i18n="add_note"></div>
+      <div style="font-size:10px;color:var(--dk-text3);margin-top:9px;">* コストが0の場合、コスパグレードは自動でSになります。</div>
     </div>
-    <div class="modal-foot">
-      <button class="sm-btn" onclick="closeModal('add-overlay')" data-i18n="add_cancel">キャンセル</button>
-      <button class="sm-btn gold" onclick="addCustom()" style="padding:5px 16px;" data-i18n="add_save">保存して追加</button>
-    </div>
+    <div class="modal-foot"><button class="sm-btn" onclick="closeModal('add-overlay')">キャンセル</button><button class="sm-btn gold" onclick="addCustom()" style="padding:5px 16px;">保存して追加</button></div>
   </div>
 </div>
 
 <!-- PRIVACY MODAL -->
 <div class="overlay open" id="priv-overlay">
-  <div class="modal" style="width:490px;">
-    <div class="priv-top">
-      <div class="priv-icon">🔒</div>
-      <div class="priv-h" data-i18n="priv_h">プライバシーと免責事項</div>
-    </div>
+  <div class="modal" style="width:480px;">
+    <div class="priv-top"><div class="priv-icon">🔒</div><div class="priv-h" data-i18n="priv_h">プライバシーと免責事項</div></div>
     <div class="modal-body">
-      <div class="priv-block">
-        <div class="priv-block-t" data-i18n="priv_b1_t"></div>
-        <div class="priv-block-b" data-i18n-html="priv_b1_b"></div>
-      </div>
-      <div class="priv-block">
-        <div class="priv-block-t" data-i18n="priv_b2_t"></div>
-        <div class="priv-block-b" data-i18n-html="priv_b2_b"></div>
-      </div>
-      <div class="priv-block">
-        <div class="priv-block-t" data-i18n="priv_b3_t"></div>
-        <div class="priv-block-b" data-i18n-html="priv_b3_b"></div>
-      </div>
+      <div class="priv-block"><div class="priv-block-t" data-i18n="priv_b1_t"></div><div class="priv-block-b" data-i18n-html="priv_b1_b"></div></div>
+      <div class="priv-block"><div class="priv-block-t" data-i18n="priv_b2_t"></div><div class="priv-block-b" data-i18n-html="priv_b2_b"></div></div>
+      <div class="priv-block"><div class="priv-block-t" data-i18n="priv_b3_t"></div><div class="priv-block-b" data-i18n-html="priv_b3_b"></div></div>
       <div class="priv-disclaimer" data-i18n="priv_disclaimer"></div>
     </div>
     <div class="priv-foot">
       <div class="priv-mode-row">
         <span style="font-size:11px;color:var(--dk-text2);" data-i18n="priv_mode_label"></span>
-        <label class="toggle">
-          <input type="checkbox" id="priv-pm" onchange="setPrivMode(this.checked)">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
+        <label class="toggle"><input type="checkbox" id="priv-pm" onchange="setPrivMode(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
       </div>
       <button class="priv-accept" onclick="acceptPrivacy()" data-i18n="priv_accept"></button>
     </div>
@@ -479,231 +489,149 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 
 <script>
 'use strict';
+
 // ============================================================
 //  i18n
 // ============================================================
-const STRINGS = {
+const STRINGS={
   ja:{
-    hdr_service:'RAG Data Generator', hdr_tag:'For Personal AI OS',
-    hdr_clear:'全データ削除', hdr_local:'🔒 ローカル処理のみ', hdr_pm:'🛡 プライバシーモード ON',
-    step1:'LLMを選ぶ', step2:'テキスト入力 & チャンク設定', step3:'コスパ確認 & 生成',
-    prov_all:'すべて', prov_local:'Local', btn_update:'☁ 更新', btn_manual:'＋ 手動',
-    ollama_ing:'Ollama: 検索中...',
-    ollama_ok:'Ollama: {n}モデル検出',
-    ollama_ng:'Ollama: 未検出 (起動後↻で再検索)',
-    sec_input:'入力テキスト', sec_chunk:'チャンク設定',
+    hdr_clear:'全データ削除',hdr_local:'🔒 ローカル処理のみ',hdr_pm:'🛡 プライバシーモード ON',
+    step1:'LLMを選ぶ',step2:'テキスト入力 & チャンク設定',step3:'コスパ比較 & 生成',
+    src_builtin:'組み込み',
+    cmp_title:'比較中のモデル（最大4件）',
+    cmp_empty:'モデルを選んで「比較追加」を押してください',
+    cmp_table_title:'モデル別コスト比較（クリックで生成モデル選択）',
+    cmp_table_empty:'左パネルでモデルを比較追加してください',
+    btn_add_cmp:'比較追加',btn_in_cmp:'比較中',btn_set_gen:'生成に使う',btn_gen_active:'生成モデル',
+    prov_all:'すべて',prov_local:'Local',btn_update:'☁ 更新',btn_manual:'＋ 手動',
+    sec_input:'入力テキスト',sec_chunk:'チャンク設定',
     txt_ph:'RAGに使いたいテキストをここに貼り付け...\n\nFAQ・マニュアル / 製品説明文 / 会社概要 / ブログ記事\nAnythingLLM・LM Studio・Ollama などの Personal AI OS 向けデータを生成します。',
-    char_row:'{n}文字 · 推定 {t}トークン',
-    unit_chars:'文字', unit_items:'件',
-    sl_chunk:'チャンクサイズ', sl_chunk_hint:'小 → 精密な検索 ／ 大 → 文脈を広く保持',
-    sl_overlap:'オーバーラップ', sl_overlap_hint:'チャンク間の重複（前後文脈の連続性）',
-    sl_topk:'検索上限 top-k', sl_topk_hint:'回答生成時に参照するチャンク数',
-    stat_chunks:'チャンク数', stat_chars:'総文字数', stat_cost:'Emb.費用',
-    copas_title:'コスパ採点', copas_none:'LLMを選択してください',
-    grade_S:'コスパ最優秀', grade_A:'コスパ良好', grade_B:'高品質・中コスト', grade_C:'最高品質・高コスト',
-    preview_label:'チャンクプレビュー', preview_empty:'テキストを入力するとプレビューが表示されます',
+    char_row:'{n}文字 · 推定 {t}トークン',unit_chars:'文字',unit_items:'件',
+    sl_chunk:'チャンクサイズ',sl_chunk_hint:'小 → 精密な検索 ／ 大 → 文脈を広く保持',
+    sl_overlap:'オーバーラップ',sl_overlap_hint:'チャンク間の重複（前後文脈の連続性）',
+    sl_topk:'検索上限 top-k',sl_topk_hint:'回答生成時に参照するチャンク数',
+    stat_chunks:'チャンク数',stat_chars:'総文字数',stat_cost:'生成コスト',
+    preview_label:'チャンクプレビュー',preview_empty:'テキストを入力するとプレビューが表示されます',
     preview_more:'+{n}チャンク（生成後のファイルに全件収録）',
     chunk_label:'チャンク {i} / {total}',
-    fmt_label:'出力フォーマット', fmt_rec:'推奨', gen_btn:'▶ {fmt} ({ext}) で生成',
-    m_cost:'コスト', m_speed:'速度', m_qual:'品質',
-    upd_title:'☁ クラウドモデルを更新',
-    upd_note:'APIキーを入力して「取得」を押すと最新のモデル一覧を取得します。\nキーはブラウザのlocalStorageにのみ保存されます（外部サーバーには送信されません）。',
-    upd_fetch:'取得', upd_all:'☁ すべて更新', upd_close:'閉じる',
-    upd_anthropic_note:'Anthropic APIはブラウザからの直接アクセス（CORS）に非対応です。モデルリストはキュレーション済みデータを使用。最新情報: docs.anthropic.com',
+    fmt_label:'出力フォーマット',fmt_rec:'推奨',gen_btn:'▶ {fmt} ({ext}) で生成',
+    m_cost:'コスト',m_speed:'速度',m_qual:'品質',
+    upd_note:'APIキーを入力して「取得」を押すと最新のモデル一覧を取得します。\nキーはブラウザのlocalStorageにのみ保存されます。',
+    upd_fetch:'取得',upd_all:'☁ すべて更新',upd_close:'閉じる',
+    upd_anthropic_note:'Anthropic APIはブラウザからのCORSに非対応。モデルリストはキュレーション済みデータを使用。',
     upd_cors_note:'※ MistralのAPIがCORSを許可していない場合、取得に失敗することがあります。',
     upd_curated:'キュレーション済み · 手動更新対応',
-    add_title:'＋ モデルを手動で追加',
-    add_name:'モデル名 *', add_name_ph:'例: My Custom LLM 7B',
-    add_prov:'プロバイダー', add_embed:'Embeddingモデル',
-    add_inp:'入力コスト ($/MTok)', add_out:'出力コスト ($/MTok)',
-    add_speed:'速度スコア (0–100)', add_qual:'品質スコア (0–100)',
-    add_tags:'タグ (カンマ区切り)', add_tags_ph:'高品質, 日本語対応, 無料',
-    add_desc:'説明', add_desc_ph:'このモデルの特徴や用途',
-    add_local:'ローカルモデル?', add_no:'いいえ', add_yes:'はい (LOCAL)',
-    add_note:'* コストが0の場合、コスパグレードは自動でSになります。',
-    add_cancel:'キャンセル', add_save:'保存して追加',
     priv_h:'プライバシーと免責事項',
     priv_b1_t:'✓ データはすべてブラウザ内で処理されます',
-    priv_b1_b:'入力したテキストは <strong>外部サーバーに送信されません</strong>。<br>すべての処理（チャンク分割・ファイル生成）はブラウザ内のみで完結します。',
+    priv_b1_b:'入力したテキストは <strong>外部サーバーに送信されません</strong>。すべての処理はブラウザ内のみで完結します。',
     priv_b2_t:'🔑 APIキーの扱いについて',
-    priv_b2_b:'入力したAPIキーはブラウザの <code style="font-size:10px;background:var(--dk-bg4);padding:1px 4px;border-radius:3px;">localStorage</code> にのみ保存されます。<strong>プライバシーモード</strong>をONにすると、ページを閉じた時点ですべて自動消去されます。',
+    priv_b2_b:'APIキーはブラウザの <code style="font-size:10px;background:var(--dk-bg4);padding:1px 4px;border-radius:3px;">localStorage</code> にのみ保存されます。<strong>プライバシーモード</strong>をONにするとページを閉じた時点で自動消去されます。',
     priv_b3_t:'🗑 使用後のデータ削除',
-    priv_b3_b:'個人情報が含まれる可能性がある場合は、使用後に必ずヘッダーの <strong>「全データ削除」</strong> ボタンを押してください。入力テキスト・APIキー・保存済みデータをすべて消去します。',
+    priv_b3_b:'個人情報が含まれる場合は、使用後に必ず <strong>「全データ削除」</strong> ボタンを押してください。',
     priv_disclaimer:'⚠️ 個人情報が含まれると思われるデータを使用する場合は、使用終了後にクリアボタンで全データを削除してください。このサービスを使用して生じたいかなる損害・トラブルに対して、dkstudioは一切の責任を負いません。',
     priv_mode_label:'プライバシーモード（ページを閉じたらデータを自動削除）',
     priv_accept:'内容を確認しました。使用を開始する',
-    clear_confirm:'以下のすべてのデータを削除します:\n\n・入力テキスト\n・APIキー（OpenAI・Google・Mistral）\n・手動追加のカスタムモデル\n・取得済みモデルキャッシュ\n\n続行しますか？',
+    clear_confirm:'以下のすべてのデータを削除します:\n・入力テキスト\n・APIキー\n・カスタムモデル\n・取得済みモデルキャッシュ\n\n続行しますか？',
     clear_done:'✓ データを削除しました',
-    db_status:'モデルDB: {date}時点 · {n}モデル収録',
+    db_status:'モデルDB: {n}件',
   },
   en:{
-    hdr_service:'RAG Data Generator', hdr_tag:'For Personal AI OS',
-    hdr_clear:'Clear All Data', hdr_local:'🔒 Local Processing Only', hdr_pm:'🛡 Privacy Mode ON',
-    step1:'Choose LLM', step2:'Text Input & Chunk Settings', step3:'Cost Check & Generate',
-    prov_all:'All', prov_local:'Local', btn_update:'☁ Update', btn_manual:'＋ Manual',
-    ollama_ing:'Ollama: Searching...',
-    ollama_ok:'Ollama: {n} models found',
-    ollama_ng:'Ollama: Not found (↻ after launching)',
-    sec_input:'Input Text', sec_chunk:'Chunk Settings',
-    txt_ph:'Paste text for RAG here...\n\nExamples: FAQ / Manuals / Product info / Blog articles\nGenerates data for Personal AI OS: AnythingLLM, LM Studio, Ollama, etc.',
-    char_row:'{n} chars · est. {t} tokens',
-    unit_chars:' chars', unit_items:'',
-    sl_chunk:'Chunk Size', sl_chunk_hint:'Small → precise retrieval ／ Large → broader context',
-    sl_overlap:'Overlap', sl_overlap_hint:'Overlap between chunks (context continuity)',
-    sl_topk:'Top-K Limit', sl_topk_hint:'Number of chunks retrieved per query',
-    stat_chunks:'Chunks', stat_chars:'Total Chars', stat_cost:'Emb. Cost',
-    copas_title:'Cost Efficiency', copas_none:'Select an LLM to begin',
-    grade_S:'Best Value', grade_A:'Good Value', grade_B:'High Quality · Mid Cost', grade_C:'Top Quality · High Cost',
-    preview_label:'Chunk Preview', preview_empty:'Enter text to see chunk preview',
+    hdr_clear:'Clear All Data',hdr_local:'🔒 Local Processing Only',hdr_pm:'🛡 Privacy Mode ON',
+    step1:'Choose LLM',step2:'Text Input & Chunk Settings',step3:'Cost Compare & Generate',
+    src_builtin:'Built-in',
+    cmp_title:'Models in comparison (max 4)',
+    cmp_empty:'Select a model and click "Add to Compare"',
+    cmp_table_title:'Cost comparison (click to select for generation)',
+    cmp_table_empty:'Add models to compare from the left panel',
+    btn_add_cmp:'Compare',btn_in_cmp:'In Compare',btn_set_gen:'Use for Gen',btn_gen_active:'Active',
+    prov_all:'All',prov_local:'Local',btn_update:'☁ Update',btn_manual:'＋ Manual',
+    sec_input:'Input Text',sec_chunk:'Chunk Settings',
+    txt_ph:'Paste text for RAG here...\n\nFAQ / Manuals / Product info / Blog articles\nGenerates data for Personal AI OS: AnythingLLM, LM Studio, Ollama, etc.',
+    char_row:'{n} chars · est. {t} tokens',unit_chars:' chars',unit_items:'',
+    sl_chunk:'Chunk Size',sl_chunk_hint:'Small → precise retrieval ／ Large → broader context',
+    sl_overlap:'Overlap',sl_overlap_hint:'Overlap between chunks (context continuity)',
+    sl_topk:'Top-K Limit',sl_topk_hint:'Number of chunks retrieved per query',
+    stat_chunks:'Chunks',stat_chars:'Total Chars',stat_cost:'Gen Cost',
+    preview_label:'Chunk Preview',preview_empty:'Enter text to see chunk preview',
     preview_more:'+{n} more chunks (all included in output)',
     chunk_label:'Chunk {i} / {total}',
-    fmt_label:'Output Format', fmt_rec:'Rec.', gen_btn:'▶ Generate {fmt} ({ext})',
-    m_cost:'Cost', m_speed:'Speed', m_qual:'Quality',
-    upd_title:'☁ Update Cloud Models',
-    upd_note:'Enter your API key and click Fetch to get the latest model list.\nKeys are stored in browser localStorage only — never sent to external servers.',
-    upd_fetch:'Fetch', upd_all:'☁ Update All', upd_close:'Close',
-    upd_anthropic_note:'Anthropic API does not support browser-side CORS. Model list uses curated data. Latest: docs.anthropic.com',
-    upd_cors_note:'※ Mistral fetch may fail if their API does not allow CORS from browsers.',
+    fmt_label:'Output Format',fmt_rec:'Rec.',gen_btn:'▶ Generate {fmt} ({ext})',
+    m_cost:'Cost',m_speed:'Speed',m_qual:'Quality',
+    upd_note:'Enter your API key and click Fetch to get the latest model list.\nKeys are stored in browser localStorage only.',
+    upd_fetch:'Fetch',upd_all:'☁ Update All',upd_close:'Close',
+    upd_anthropic_note:'Anthropic API does not support browser CORS. Model list uses curated data.',
+    upd_cors_note:'※ Mistral fetch may fail if their API does not allow CORS.',
     upd_curated:'Curated · Manual update supported',
-    add_title:'＋ Add Model Manually',
-    add_name:'Model Name *', add_name_ph:'e.g. My Custom LLM 7B',
-    add_prov:'Provider', add_embed:'Embedding Model',
-    add_inp:'Input Cost ($/MTok)', add_out:'Output Cost ($/MTok)',
-    add_speed:'Speed Score (0–100)', add_qual:'Quality Score (0–100)',
-    add_tags:'Tags (comma separated)', add_tags_ph:'High quality, Japanese, Free',
-    add_desc:'Description', add_desc_ph:'Key features and use cases',
-    add_local:'Local model?', add_no:'No', add_yes:'Yes (LOCAL)',
-    add_note:'* Cost 0 = automatically assigned grade S.',
-    add_cancel:'Cancel', add_save:'Save & Add',
     priv_h:'Privacy & Disclaimer',
     priv_b1_t:'✓ All data processed in your browser',
-    priv_b1_b:'Your input text is <strong>never sent to any external server</strong>.<br>All processing (chunking, file generation) happens locally in your browser.',
+    priv_b1_b:'Your input text is <strong>never sent to any external server</strong>. All processing happens locally in your browser.',
     priv_b2_t:'🔑 API Key Handling',
-    priv_b2_b:'API keys are stored only in your browser\'s <code style="font-size:10px;background:var(--dk-bg4);padding:1px 4px;border-radius:3px;">localStorage</code>. Enable <strong>Privacy Mode</strong> to auto-delete everything when you close the page.',
+    priv_b2_b:'API keys are stored only in your browser\'s <code style="font-size:10px;background:var(--dk-bg4);padding:1px 4px;border-radius:3px;">localStorage</code>. Enable <strong>Privacy Mode</strong> to auto-delete on page close.',
     priv_b3_t:'🗑 Delete Data After Use',
-    priv_b3_b:'If your text contains personal information, click <strong>"Clear All Data"</strong> in the header when you are done. This removes all input, API keys, and cached data.',
-    priv_disclaimer:'⚠️ If you are processing personal or sensitive data, please use the Clear button to delete all data after use. dkstudio accepts no responsibility for any damages or issues arising from the use of this service.',
+    priv_b3_b:'If your text contains personal information, click <strong>"Clear All Data"</strong> in the header when done.',
+    priv_disclaimer:'⚠️ If you are processing personal or sensitive data, please use the Clear button after use. dkstudio accepts no responsibility for any damages arising from use of this service.',
     priv_mode_label:'Privacy Mode (auto-delete all data when page closes)',
-    priv_accept:'I have read and understood the above. Start using the service.',
-    clear_confirm:'Delete all of the following?\n\n• Input text\n• API keys (OpenAI, Google, Mistral)\n• Custom models\n• Cached model data\n\nContinue?',
+    priv_accept:'I understand. Start using the service.',
+    clear_confirm:'Delete all of the following?\n• Input text\n• API keys\n• Custom models\n• Cached model data\n\nContinue?',
     clear_done:'✓ All data cleared',
-    db_status:'Model DB: as of {date} · {n} models',
+    db_status:'{n} models',
   }
 };
 
-let lang = 'ja';
-
-function t(key, vars={}) {
-  let s = STRINGS[lang][key] || STRINGS.ja[key] || key;
-  Object.entries(vars).forEach(([k,v]) => s = s.replaceAll('{'+k+'}', v));
-  return s;
+let lang='ja';
+function t(k,v={}){let s=STRINGS[lang][k]||STRINGS.ja[k]||k;Object.entries(v).forEach(([a,b])=>s=s.replaceAll('{'+a+'}',b));return s;}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset['i18nHtml']));
+  const tx=document.getElementById('txt');if(tx)tx.placeholder=t('txt_ph');
+  renderModels();buildProvTabs();renderCmpChips();renderCmpTable();renderFormats();updateFmtBtn();updateCopas();renderChunkPreview();
+  document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
 }
-
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    el.textContent = t(key);
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    el.innerHTML = t(el.dataset['i18nHtml']);
-  });
-  // Placeholder
-  const txt = document.getElementById('txt');
-  if (txt) txt.placeholder = t('txt_ph');
-  // Dynamic re-renders
-  updateAll();
-  renderFormats();
-  updateFmtBtn();
-  updateCopas();
-  renderChunkPreview();
-  buildProvTabs();
-  renderModels();
-  // DB status
-  updateDBStatus();
-}
-
-function setLang(l) {
-  lang = l;
-  document.getElementById('btn-ja').classList.toggle('active', l==='ja');
-  document.getElementById('btn-en').classList.toggle('active', l==='en');
-  document.documentElement.lang = l;
-  applyI18n();
-}
-
-function updateDBStatus() {
-  document.getElementById('db-status').textContent = t('db_status', {date: DB_DATE, n: STATIC_MODELS.length});
-}
+function setLang(l){lang=l;document.getElementById('btn-ja').classList.toggle('active',l==='ja');document.getElementById('btn-en').classList.toggle('active',l==='en');applyI18n();}
 
 // ============================================================
 //  DATA
 // ============================================================
-const DB_DATE = '2026-05-20';
-
-const PROV_META = {
-  anthropic:{name:'Anthropic',clr:'#cc785c'},
-  openai:   {name:'OpenAI',   clr:'#10a37f'},
-  google:   {name:'Google',   clr:'#4285f4'},
-  mistral:  {name:'Mistral',  clr:'#f97316'},
-  meta:     {name:'Meta',     clr:'#0668e1'},
-  ollama:   {name:'Ollama',   clr:'#7a9085'},
-  custom:   {name:'Custom',   clr:'#9090cc'},
-};
-
-const PRICE_MAP = {
-  'claude-opus-4':  {inP:5.00,outP:25.0},'claude-sonnet-4':{inP:3.00,outP:15.0},
-  'claude-haiku-4': {inP:1.00,outP:5.00},
-  'gpt-4o':         {inP:2.50,outP:10.0},'gpt-4o-mini':    {inP:0.15,outP:0.60},
-  'o3':             {inP:10.0,outP:40.0},'o4-mini':         {inP:1.10,outP:4.40},
-  'gemini-2.5-pro': {inP:1.25,outP:10.0},'gemini-2.5-flash':{inP:0.30,outP:2.50},
-  'gemini-2.5-flash-lite':{inP:0.10,outP:0.40},'gemini-2.0-flash':{inP:0.10,outP:0.40},
-  'mistral-large':  {inP:2.00,outP:6.00},'mistral-small':   {inP:0.20,outP:0.60},
-  'codestral':      {inP:0.30,outP:0.90},
-};
-const QUAL_MAP = {
-  'claude-opus':99,'claude-sonnet':92,'claude-haiku':82,
-  'gpt-4o':91,'gpt-4o-mini':78,'o3':99,'o4-mini':94,
-  'gemini-2.5-pro':95,'gemini-2.5-flash':85,'gemini-2.5-flash-lite':72,'gemini-2.0':75,
-  'mistral-large':88,'mistral-small':75,'codestral':80,
-};
-function lkPrice(id){for(const[k,v]of Object.entries(PRICE_MAP)){if(id.toLowerCase().includes(k.replace(/-latest/g,'')))return v;}return null;}
-function lkQual(id){for(const[k,v]of Object.entries(QUAL_MAP)){if(id.toLowerCase().includes(k))return v;}return 75;}
+const PROV_META={anthropic:{name:'Anthropic',clr:'#cc785c'},openai:{name:'OpenAI',clr:'#10a37f'},google:{name:'Google',clr:'#4285f4'},mistral:{name:'Mistral',clr:'#f97316'},meta:{name:'Meta',clr:'#0668e1'},ollama:{name:'Ollama',clr:'#7a9085'},custom:{name:'Custom',clr:'#9090cc'}};
+const PRICE_MAP={'claude-opus-4':{inP:5.00,outP:25.0},'claude-sonnet-4':{inP:3.00,outP:15.0},'claude-haiku-4':{inP:1.00,outP:5.00},'gpt-4o':{inP:2.50,outP:10.0},'gpt-4o-mini':{inP:0.15,outP:0.60},'o3':{inP:10.0,outP:40.0},'o4-mini':{inP:1.10,outP:4.40},'gemini-2.5-pro':{inP:1.25,outP:10.0},'gemini-2.5-flash':{inP:0.30,outP:2.50},'gemini-2.5-flash-lite':{inP:0.10,outP:0.40},'gemini-2.0-flash':{inP:0.10,outP:0.40},'mistral-large':{inP:2.00,outP:6.00},'mistral-small':{inP:0.20,outP:0.60}};
+const QUAL_MAP={'claude-opus':99,'claude-sonnet':92,'claude-haiku':82,'gpt-4o':91,'gpt-4o-mini':78,'o3':99,'o4-mini':94,'gemini-2.5-pro':95,'gemini-2.5-flash':85,'gemini-2.5-flash-lite':72,'gemini-2.0':75,'mistral-large':88,'mistral-small':75};
+function lkP(id){for(const[k,v]of Object.entries(PRICE_MAP)){if(id.toLowerCase().includes(k.replace(/-latest/g,'')))return v;}return null;}
+function lkQ(id){for(const[k,v]of Object.entries(QUAL_MAP)){if(id.toLowerCase().includes(k))return v;}return 75;}
 function calcGrade(inP,outP){if(inP===0)return'S';const c=inP*0.7+outP*0.3;if(c<0.5)return'S';if(c<3)return'A';if(c<8)return'B';if(c<20)return'C';return'D';}
 
-const STATIC_MODELS = [
-  {id:'claude-opus-4-7',  prov:'anthropic',name:'Claude Opus 4.7',   grade:'B',inP:5.00,outP:25.0,speed:58,qual:99,embed:'Voyage AI',         tags:['Best Quality','Complex'],      desc:{ja:'品質最優先。高付加価値コンテンツ向け。',en:'Top quality. For high-value content generation.'}},
-  {id:'claude-sonnet-4-6',prov:'anthropic',name:'Claude Sonnet 4.6', grade:'B',inP:3.00,outP:15.0,speed:74,qual:92,embed:'Voyage AI',         tags:['Balanced','Production'],       desc:{ja:'品質×コストのベスト。本番サービスの定番。',en:'Best quality-cost balance. Production standard.'}},
-  {id:'claude-haiku-4-5', prov:'anthropic',name:'Claude Haiku 4.5',  grade:'A',inP:1.00,outP:5.00,speed:88,qual:82,embed:'Voyage AI',         tags:['Fast','Affordable'],           desc:{ja:'Claude系最安。日本語対応に優れる。',en:'Most affordable Claude. Excellent Japanese support.'}},
-  {id:'gpt-4o',           prov:'openai',   name:'GPT-4o',            grade:'B',inP:2.50,outP:10.0,speed:73,qual:91,embed:'text-emb-3-large',  tags:['High Performance','Versatile'],desc:{ja:'GPT系最高峰。既存システムとの連携が容易。',en:'Top GPT model. Easy integration with existing systems.'}},
-  {id:'gpt-4o-mini',      prov:'openai',   name:'GPT-4o mini',       grade:'S',inP:0.15,outP:0.60,speed:91,qual:78,embed:'text-emb-3-small',  tags:['Best Value','High Volume'],    desc:{ja:'OpenAI最安。大量処理に圧倒的コスパ。',en:'OpenAI\'s most affordable. Outstanding value for bulk.'}},
-  {id:'o4-mini',          prov:'openai',   name:'o4-mini (reasoning)',grade:'B',inP:1.10,outP:4.40,speed:65,qual:94,embed:'text-emb-3-small',  tags:['Reasoning','Math/Code'],       desc:{ja:'思考系モデル。複雑な推論タスクに強い。',en:'Reasoning model. Excellent for complex logic tasks.'}},
-  {id:'o3',               prov:'openai',   name:'o3 (reasoning)',    grade:'C',inP:10.0,outP:40.0,speed:45,qual:99,embed:'text-emb-3-large',  tags:['Top Reasoning','High Cost'],   desc:{ja:'推論系の頂点。研究・高度分析向け。',en:'Pinnacle reasoning. For research and deep analysis.'}},
-  {id:'gemini-2-5-pro',   prov:'google',   name:'Gemini 2.5 Pro',    grade:'B',inP:1.25,outP:10.0,speed:70,qual:95,embed:'text-embedding-004',tags:['High Quality','1M Context'],   desc:{ja:'Google最上位。100万token対応。',en:'Google flagship. Supports 1M token context.'}},
-  {id:'gemini-2-5-flash', prov:'google',   name:'Gemini 2.5 Flash',  grade:'A',inP:0.30,outP:2.50,speed:86,qual:85,embed:'text-embedding-004',tags:['Balanced','Fast'],             desc:{ja:'速度と品質のバランス。中規模サービスに最適。',en:'Speed and quality balance. Ideal for mid-scale services.'}},
-  {id:'gemini-flash-lite',prov:'google',   name:'Gemini Flash-Lite', grade:'S',inP:0.10,outP:0.40,speed:96,qual:72,embed:'text-embedding-004',tags:['Cheapest','Ultra Fast'],       desc:{ja:'Embedding込み最安値。常時稼働サービスに。',en:'Lowest cost incl. embedding. For always-on services.'}},
-  {id:'mistral-large',    prov:'mistral',  name:'Mistral Large',     grade:'B',inP:2.00,outP:6.00,speed:76,qual:88,embed:'mistral-embed',     tags:['EU Based','High Quality'],     desc:{ja:'欧州製。GDPR対応・プライバシー重視の用途に。',en:'EU-based. GDPR compliant, privacy-focused use cases.'}},
-  {id:'mistral-small',    prov:'mistral',  name:'Mistral Small',     grade:'A',inP:0.20,outP:0.60,speed:86,qual:75,embed:'mistral-embed',     tags:['Affordable','EU Based'],       desc:{ja:'Mistral系最安。軽量タスクに。',en:'Most affordable Mistral. For lightweight tasks.'}},
-  {id:'llama3-3-70b',     prov:'meta',     name:'Llama 3.3 70B',     grade:'S',inP:0,   outP:0,   speed:75,qual:84,embed:'nomic-embed-text',  tags:['Free','Open Source'],          desc:{ja:'Meta製最高峰。Ollama経由で利用可能。',en:'Meta\'s best. Available via Ollama.'},local:true},
-  {id:'llama3-2-3b',      prov:'meta',     name:'Llama 3.2 3B',      grade:'S',inP:0,   outP:0,   speed:95,qual:68,embed:'nomic-embed-text',  tags:['Ultra Light','Free'],          desc:{ja:'3Bパラメータ。ローカル環境でも快適動作。',en:'3B params. Runs smoothly on local hardware.'},local:true},
-  {id:'qwen2-5-14b',      prov:'meta',     name:'Qwen 2.5 14B',      grade:'S',inP:0,   outP:0,   speed:82,qual:82,embed:'nomic-embed-text',  tags:['Free','Strong Japanese'],      desc:{ja:'Alibaba製。日本語・中国語に特に強い。',en:'By Alibaba. Particularly strong in Japanese & Chinese.'},local:true},
+const FORMATS=[
+  {id:'json',name:'JSON',ext:'.json',rec:true,desc:{ja:'AnythingLLM標準',en:'AnythingLLM native'},compat:['AnythingLLM','LangChain','LlamaIndex','ChromaDB']},
+  {id:'jsonl',name:'JSONL',ext:'.jsonl',rec:true,desc:{ja:'1行=1チャンク',en:'1 line = 1 chunk'},compat:['LlamaIndex','ChromaDB','Pinecone','Qdrant']},
+  {id:'md',name:'Markdown',ext:'.md',rec:true,desc:{ja:'人間も読みやすい',en:'Human-readable'},compat:['Obsidian','Notion AI','GitHub Copilot']},
+  {id:'txt',name:'Text',ext:'.txt',rec:false,desc:{ja:'最も互換性が高い',en:'Most compatible'},compat:['AnythingLLM','LM Studio','All systems']},
+  {id:'csv',name:'CSV',ext:'.csv',rec:false,desc:{ja:'レビュー・分析用',en:'Review & analysis'},compat:['Excel','Google Sheets']},
+  {id:'xlsx',name:'Excel',ext:'.xlsx',rec:false,desc:{ja:'メタデータ付き分析',en:'Metadata analysis'},compat:['Excel','LibreOffice']},
+  {id:'xml',name:'XML',ext:'.xml',rec:false,desc:{ja:'エンタープライズ連携',en:'Enterprise systems'},compat:['Confluence','SharePoint']},
+  {id:'yaml',name:'YAML',ext:'.yaml',rec:false,desc:{ja:'設定ファイル形式',en:'Config file format'},compat:['Haystack','Config management']},
 ];
 
-const FORMATS = [
-  {id:'json', name:'JSON',     ext:'.json', rec:true, desc:{ja:'AnythingLLM標準', en:'AnythingLLM native'},  compat:['AnythingLLM','LangChain','LlamaIndex','ChromaDB']},
-  {id:'jsonl',name:'JSONL',    ext:'.jsonl',rec:true, desc:{ja:'1行=1チャンク',   en:'1 line = 1 chunk'},     compat:['LlamaIndex','ChromaDB','Pinecone','Qdrant']},
-  {id:'md',   name:'Markdown', ext:'.md',   rec:true, desc:{ja:'人間も読みやすい', en:'Human-readable'},       compat:['Obsidian','Notion AI','GitHub Copilot']},
-  {id:'txt',  name:'Text',     ext:'.txt',  rec:false,desc:{ja:'最も互換性が高い', en:'Most compatible'},      compat:['AnythingLLM','LM Studio','All systems']},
-  {id:'csv',  name:'CSV',      ext:'.csv',  rec:false,desc:{ja:'レビュー・分析用', en:'Review & analysis'},    compat:['Excel','Google Sheets']},
-  {id:'xlsx', name:'Excel',    ext:'.xlsx', rec:false,desc:{ja:'メタデータ付き分析',en:'Metadata analysis'},  compat:['Excel','LibreOffice']},
-  {id:'xml',  name:'XML',      ext:'.xml',  rec:false,desc:{ja:'エンタープライズ連携',en:'Enterprise systems'},compat:['Confluence','SharePoint']},
-  {id:'yaml', name:'YAML',     ext:'.yaml', rec:false,desc:{ja:'設定ファイル形式', en:'Config file format'},   compat:['Haystack','Config management']},
-];
-
-// ============================================================
-//  STATE
-// ============================================================
-let selModel=null, curProv='all', chunks=[], selFmt='json';
-let ollamaModels=[], fetchedModels={}, customModels=[], apiKeys={};
+// State
+let builtinModels=[];
+let jsonModels=[];     // loaded from URL/file/GitHub
+let fetchedModels={};  // from cloud APIs
+let ollamaModels=[];
+let customModels=[];
+let apiKeys={};
 let privMode=false;
+let curProv='all';
+let cmpModels=[];      // ids in comparison (max 4)
+let genModelId=null;   // active model for generation
+let chunks=[];
+let selFmt='json';
+
+function allModels(){
+  const sIds=new Set(builtinModels.map(m=>m.id));
+  const jsonFiltered=jsonModels.filter(m=>!sIds.has(m.id));
+  const fetchedFlat=Object.values(fetchedModels).flat().filter(m=>!sIds.has(m.id)&&!jsonFiltered.find(j=>j.id===m.id));
+  const ollamaFiltered=ollamaModels.filter(m=>!sIds.has(m.id));
+  return[...builtinModels,...jsonFiltered,...fetchedFlat,...ollamaFiltered,...customModels];
+}
+function findModel(id){return allModels().find(m=>m.id===id);}
 
 // ============================================================
 //  STORAGE
@@ -713,52 +641,104 @@ function loadStorage(){
     apiKeys=JSON.parse(localStorage.getItem('dk_api_keys')||'{}');
     customModels=JSON.parse(localStorage.getItem('dk_custom_models')||'[]');
     fetchedModels=JSON.parse(localStorage.getItem('dk_fetched_models')||'{}');
+    jsonModels=JSON.parse(localStorage.getItem('dk_json_models')||'[]');
+    cmpModels=JSON.parse(localStorage.getItem('dk_cmp_models')||'[]');
+    genModelId=localStorage.getItem('dk_gen_model')||null;
     ['openai','google','mistral'].forEach(p=>{const el=document.getElementById('key-'+p);if(el&&apiKeys[p])el.value=apiKeys[p];});
   }catch{}
 }
-function _saveKey(p,v){apiKeys[p]=v;if(!privMode)try{localStorage.setItem('dk_api_keys',JSON.stringify(apiKeys));}catch{}}
-function _saveCustom(){if(!privMode)try{localStorage.setItem('dk_custom_models',JSON.stringify(customModels));}catch{}}
-function _saveFetched(){if(!privMode)try{localStorage.setItem('dk_fetched_models',JSON.stringify(fetchedModels));}catch{}}
-function saveKey(p,v){_saveKey(p,v);}
-function _clearLS(){try{['dk_api_keys','dk_custom_models','dk_fetched_models','dk_priv_ok'].forEach(k=>localStorage.removeItem(k));}catch{}}
+function _clearLS(){try{['dk_api_keys','dk_custom_models','dk_fetched_models','dk_json_models','dk_cmp_models','dk_gen_model','dk_priv_ok'].forEach(k=>localStorage.removeItem(k));}catch{}}
+function saveKey(p,v){apiKeys[p]=v;if(!privMode)try{localStorage.setItem('dk_api_keys',JSON.stringify(apiKeys));}catch{}}
+function _save(k,v){if(!privMode)try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 
 // ============================================================
 //  PRIVACY
 // ============================================================
-function setPrivMode(on){
-  privMode=on;
-  const b=document.getElementById('priv-badge');
-  b.textContent=t(on?'hdr_pm':'hdr_local');
-  b.classList.toggle('pm',on);
-  if(on)_clearLS();
-}
-function acceptPrivacy(){
-  document.getElementById('priv-overlay').classList.remove('open');
-  if(!privMode)try{localStorage.setItem('dk_priv_ok','1');}catch{}
-}
-function checkFirstVisit(){
-  try{if(localStorage.getItem('dk_priv_ok'))document.getElementById('priv-overlay').classList.remove('open');}catch{}
-}
+function setPrivMode(on){privMode=on;const b=document.getElementById('priv-badge');b.textContent=t(on?'hdr_pm':'hdr_local');b.classList.toggle('pm',on);if(on)_clearLS();}
+function acceptPrivacy(){document.getElementById('priv-overlay').classList.remove('open');if(!privMode)try{localStorage.setItem('dk_priv_ok','1');}catch{}}
+function checkFirstVisit(){try{if(localStorage.getItem('dk_priv_ok'))document.getElementById('priv-overlay').classList.remove('open');}catch{}}
 function confirmClear(){
   if(!confirm(t('clear_confirm')))return;
   _clearLS();
   document.getElementById('txt').value='';
   ['openai','google','mistral'].forEach(p=>{const el=document.getElementById('key-'+p);if(el)el.value='';});
-  selModel=null;customModels=[];fetchedModels={};ollamaModels=[];apiKeys={};chunks=[];
-  buildProvTabs();renderModels();updateAll();
-  const btn=document.getElementById('gen-btn');
-  if(btn){btn.textContent=t('clear_done');setTimeout(()=>updateFmtBtn(),2500);}
+  customModels=[];fetchedModels={};jsonModels=[];ollamaModels=[];apiKeys={};chunks=[];cmpModels=[];genModelId=null;
+  buildProvTabs();renderModels();renderCmpChips();renderCmpTable();updateAll();
+  const btn=document.getElementById('gen-btn');if(btn){btn.textContent=t('clear_done');setTimeout(()=>updateFmtBtn(),2500);}
 }
 window.addEventListener('beforeunload',()=>{if(privMode)_clearLS();});
 
 // ============================================================
-//  ALL MODELS
+//  LOAD GITHUB MODELS (auto on startup)
 // ============================================================
-function allModels(){
-  const sIds=new Set(STATIC_MODELS.map(m=>m.id));
-  const fetched=Object.values(fetchedModels).flat().filter(m=>!sIds.has(m.id));
-  const ollama=ollamaModels.filter(m=>!sIds.has(m.id));
-  return [...STATIC_MODELS,...fetched,...ollama,...customModels];
+async function loadGitHubModels(manual=false){
+  const ghSrc=document.getElementById('src-github');
+  const st=document.getElementById('json-gh-st');
+  const url='https://raw.githubusercontent.com/dkstudio-jp/rag-data-generator/main/models.json';
+  if(ghSrc){ghSrc.querySelector('.src-dot').className='src-dot loading';ghSrc.querySelector('span').textContent='GitHub...';}
+  try{
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const models=parseJsonModels(data,'github');
+    jsonModels=jsonModels.filter(m=>m._src!=='github');
+    jsonModels=[...jsonModels,...models];
+    _save('dk_json_models',jsonModels);
+    if(ghSrc){ghSrc.querySelector('.src-dot').className='src-dot ok';ghSrc.querySelector('span').textContent=`GitHub (${models.length}件)`;}
+    if(st){st.className='json-st ok';st.textContent=`✓ ${models.length}モデル読み込み完了 (${new Date().toLocaleTimeString()})`;}
+    buildProvTabs();renderModels();
+    document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+  }catch(e){
+    if(ghSrc){ghSrc.querySelector('.src-dot').className='src-dot err';ghSrc.querySelector('span').textContent='GitHub: 未接続';}
+    if(st){st.className='json-st err';st.textContent='エラー: '+e.message;}
+  }
+}
+
+function parseJsonModels(data,src){
+  const models=data.models||[];
+  return models.map(m=>({...m,_src:src,source:src})).filter(m=>m.id&&m.name);
+}
+
+async function loadFromUrl(){
+  const url=document.getElementById('json-url-input').value.trim();
+  const st=document.getElementById('json-url-st');
+  if(!url){st.className='json-st err';st.textContent='URLを入力してください';return;}
+  st.className='json-st';st.style.display='block';st.style.color='var(--dk-gold)';st.textContent='読み込み中...';
+  try{
+    const res=await fetch(url);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const models=parseJsonModels(data,'url:'+url);
+    jsonModels=[...jsonModels.filter(m=>m._src!==('url:'+url)),...models];
+    _save('dk_json_models',jsonModels);
+    st.className='json-st ok';st.textContent=`✓ ${models.length}モデル読み込み完了`;
+    buildProvTabs();renderModels();
+    document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+  }catch(e){st.className='json-st err';st.textContent='エラー: '+e.message;}
+}
+
+function handleFileDrop(e){e.preventDefault();document.getElementById('json-dropzone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)readJsonFile(f);}
+function handleFileSelect(inp){if(inp.files[0])readJsonFile(inp.files[0]);}
+function readJsonFile(file){
+  const st=document.getElementById('json-file-st');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const models=parseJsonModels(data,'file:'+file.name);
+      jsonModels=[...jsonModels.filter(m=>m._src!==('file:'+file.name)),...models];
+      _save('dk_json_models',jsonModels);
+      st.className='json-st ok';st.textContent=`✓ ${models.length}モデル読み込み完了（${file.name}）`;
+      buildProvTabs();renderModels();
+      document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+    }catch(err){st.className='json-st err';st.textContent='JSONパースエラー: '+err.message;}
+  };
+  reader.readAsText(file);
+}
+
+function switchJsonTab(tab){
+  document.querySelectorAll('.json-tab').forEach((el,i)=>el.classList.toggle('active',['url','file','github'][i]===tab));
+  document.querySelectorAll('.json-section').forEach((el,i)=>el.classList.toggle('active',['url','file','github'][i]===tab));
 }
 
 // ============================================================
@@ -766,15 +746,14 @@ function allModels(){
 // ============================================================
 function buildProvTabs(){
   const all=allModels();
-  const provs=[...new Set(all.map(m=>m.prov))];
+  const provs=[...new Set(all.map(m=>m.provider||m.prov))];
   const el=document.getElementById('prov-bar');
   el.innerHTML=`<div class="ptab${curProv==='all'?' active':''}" data-p="all" onclick="filterProv('all')">${t('prov_all')} <span style="opacity:.6;font-size:9px;">${all.length}</span></div>`;
   provs.forEach(p=>{
-    const cnt=all.filter(m=>m.prov===p).length;
+    const cnt=all.filter(m=>(m.provider||m.prov)===p).length;
     el.innerHTML+=`<div class="ptab${curProv===p?' active':''}" data-p="${p}" onclick="filterProv('${p}')">${PROV_META[p]?.name||p} <span style="opacity:.6;font-size:9px;">${cnt}</span></div>`;
   });
   el.innerHTML+=`<div class="ptab${curProv==='local'?' active':''}" data-p="local" onclick="filterProv('local')">${t('prov_local')}</div>`;
-  document.getElementById('model-count').textContent=all.length+(lang==='ja'?'件':'');
 }
 function filterProv(p){curProv=p;document.querySelectorAll('.ptab').forEach(el=>el.classList.toggle('active',el.dataset.p===p));renderModels();}
 
@@ -784,137 +763,155 @@ function filterProv(p){curProv=p;document.querySelectorAll('.ptab').forEach(el=>
 function renderModels(){
   let list=allModels();
   if(curProv==='local')list=list.filter(m=>m.local);
-  else if(curProv!=='all')list=list.filter(m=>m.prov===curProv);
+  else if(curProv!=='all')list=list.filter(m=>(m.provider||m.prov)===curProv);
   const el=document.getElementById('llm-list');
   const gc={S:'var(--s-green)',A:'var(--a-green)',B:'var(--b-amber)',C:'var(--c-orange)',D:'var(--d-red)'};
+  const inCmp=id=>cmpModels.includes(id);
+  const isGen=id=>genModelId===id;
   el.innerHTML=list.map(m=>{
-    const price=m.inP===0?(lang==='ja'?'FREE':'FREE'):'$'+m.inP+'/M';
+    const prov=m.provider||m.prov;
+    const inP=m.inP??0,outP=m.outP??0;
+    const grade=m.grade||calcGrade(inP,outP);
+    const price=inP===0?'FREE':'$'+inP+'/M';
     const desc=typeof m.desc==='object'?(m.desc[lang]||m.desc.en||''):m.desc||'';
+    const src=m._src||m.source||'';
     const badges=[
-      m.local  ?`<span class="lc-badge b-local">LOCAL</span>`:'',
-      m.custom ?`<span class="lc-badge b-custom">CUSTOM</span>`:'',
-      m.fetched?`<span class="lc-badge b-live">LIVE</span>`:'',
+      m.local?'<span class="lc-badge b-local">LOCAL</span>':'',
+      m.custom?'<span class="lc-badge b-custom">CUSTOM</span>':'',
+      m.fetched?'<span class="lc-badge b-live">LIVE</span>':'',
+      (src&&!m.custom&&!m.fetched&&!m.local&&src!=='builtin')?'<span class="lc-badge b-json">JSON</span>':'',
     ].join('');
-    const delBtn=(m.custom||m.fetched)?`<button class="del-btn" onclick="event.stopPropagation();delModel('${m.id}')" title="delete">×</button>`:'';
-    return `<div class="llm-card${selModel?.id===m.id?' sel':''}" onclick="selectModel('${m.id}')">
+    const delBtn=(m.custom||m.fetched||(src&&src!=='github'&&src!=='builtin'))?`<button class="del-btn" onclick="event.stopPropagation();delModel('${m.id}')" title="削除">×</button>`:'';
+    const cmpClass=isGen(m.id)?'active-gen':inCmp(m.id)?'in-cmp':'';
+    const cmpBtnLabel=inCmp(m.id)?t('btn_in_cmp'):t('btn_add_cmp');
+    const cmpBtnClass=inCmp(m.id)?'add-cmp-btn active':'add-cmp-btn';
+    const genBtnLabel=isGen(m.id)?t('btn_gen_active'):t('btn_set_gen');
+    const genBtnClass=isGen(m.id)?'set-gen-btn active':'set-gen-btn';
+    return `<div class="llm-card ${cmpClass}" id="lc-${m.id}">
       <div class="lc-top">
         <div style="flex:1;min-width:0;">
           <div class="lc-name">${m.name}</div>
-          <div class="lc-sub">${PROV_META[m.prov]?.name||m.prov} · ${price}</div>${badges}
+          <div class="lc-sub">${PROV_META[prov]?.name||prov} · ${price}</div>${badges}
         </div>
         <div style="display:flex;align-items:flex-start;gap:4px;">
-          <div class="grade ${m.grade}" style="color:${gc[m.grade]||gc.B};">${m.grade}</div>${delBtn}
+          <div class="grade ${grade}" style="color:${gc[grade]||gc.B};">${grade}</div>${delBtn}
         </div>
       </div>
-      <div class="meter"><div class="ml">${t('m_cost')}</div><div class="mt"><div class="mf" style="width:${m.inP===0?100:Math.max(4,100-m.inP/10*85)}%;background:var(--dk-gold);"></div></div><div class="mv">${m.inP===0?'FREE':'$'+m.inP}</div></div>
-      <div class="meter"><div class="ml">${t('m_speed')}</div><div class="mt"><div class="mf" style="width:${m.speed}%;background:var(--dk-accent);"></div></div><div class="mv">${m.speed}</div></div>
-      <div class="meter"><div class="ml">${t('m_qual')}</div><div class="mt"><div class="mf" style="width:${m.qual}%;background:var(--dk-main);"></div></div><div class="mv">${m.qual}</div></div>
+      <div class="meter"><div class="ml">${t('m_cost')}</div><div class="mt"><div class="mf" style="width:${inP===0?100:Math.max(4,100-inP/10*85)}%;background:var(--dk-gold);"></div></div><div class="mv">${inP===0?'FREE':'$'+inP}</div></div>
+      <div class="meter"><div class="ml">${t('m_speed')}</div><div class="mt"><div class="mf" style="width:${m.speed||75}%;background:var(--dk-accent);"></div></div><div class="mv">${m.speed||75}</div></div>
+      <div class="meter"><div class="ml">${t('m_qual')}</div><div class="mt"><div class="mf" style="width:${m.quality||m.qual||75}%;background:var(--dk-main);"></div></div><div class="mv">${m.quality||m.qual||75}</div></div>
       <div class="lc-tags">${(m.tags||[]).map(tg=>`<span class="tag">${tg}</span>`).join('')}</div>
+      <div class="lc-actions">
+        <button class="${cmpBtnClass}" onclick="toggleCmp('${m.id}')">${cmpBtnLabel}</button>
+        <button class="${genBtnClass}" onclick="setGenModel('${m.id}')">${genBtnLabel}</button>
+      </div>
     </div>`;
   }).join('')||`<div class="empty-state">${lang==='ja'?'モデルがありません':'No models'}</div>`;
 }
-function selectModel(id){selModel=allModels().find(m=>m.id===id);renderModels();updateAll();}
+
+function toggleCmp(id){
+  if(cmpModels.includes(id)){cmpModels=cmpModels.filter(x=>x!==id);}
+  else if(cmpModels.length<4){cmpModels.push(id);}
+  _save('dk_cmp_models',cmpModels);
+  renderModels();renderCmpChips();renderCmpTable();updateAll();
+}
+function setGenModel(id){
+  genModelId=id;
+  if(!cmpModels.includes(id)&&cmpModels.length<4)cmpModels.push(id);
+  try{localStorage.setItem('dk_gen_model',id);}catch{}
+  _save('dk_cmp_models',cmpModels);
+  renderModels();renderCmpChips();renderCmpTable();updateAll();
+}
 function delModel(id){
   customModels=customModels.filter(m=>m.id!==id);
+  jsonModels=jsonModels.filter(m=>m.id!==id);
   Object.keys(fetchedModels).forEach(p=>{fetchedModels[p]=fetchedModels[p].filter(m=>m.id!==id);});
-  if(selModel?.id===id)selModel=null;
-  _saveCustom();_saveFetched();buildProvTabs();renderModels();updateAll();
+  cmpModels=cmpModels.filter(x=>x!==id);
+  if(genModelId===id)genModelId=null;
+  _save('dk_custom_models',customModels);_save('dk_json_models',jsonModels);_save('dk_fetched_models',fetchedModels);_save('dk_cmp_models',cmpModels);
+  buildProvTabs();renderModels();renderCmpChips();renderCmpTable();updateAll();
+}
+
+// ============================================================
+//  COMPARISON CHIPS
+// ============================================================
+function renderCmpChips(){
+  const el=document.getElementById('cmp-chips');
+  if(cmpModels.length===0){el.innerHTML=`<span class="cmp-empty">${t('cmp_empty')}</span>`;return;}
+  el.innerHTML=cmpModels.map(id=>{
+    const m=findModel(id);if(!m)return'';
+    const isActive=genModelId===id;
+    return`<div class="cmp-chip${isActive?' active-gen':''}" onclick="setGenModel('${id}')">
+      ${m.name.split(' ').slice(-1)[0]}
+      <span class="cmp-chip-x" onclick="event.stopPropagation();toggleCmp('${id}')">×</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  COMPARISON TABLE (right panel)
+// ============================================================
+function renderCmpTable(){
+  const el=document.getElementById('cmp-model-cols');
+  if(cmpModels.length===0){el.innerHTML=`<div class="empty-state">${t('cmp_table_empty')}</div>`;return;}
+  const toks=Math.round((document.getElementById('txt')?.value||'').length/3);
+  const models=cmpModels.map(id=>findModel(id)).filter(Boolean);
+  const costs=models.map(m=>{const inP=m.inP??0;return inP===0?0:(toks/1e6)*inP;});
+  const maxCost=Math.max(...costs,0.000001);
+  el.style.gridTemplateColumns=`repeat(${models.length},1fr)`;
+  el.innerHTML=models.map((m,i)=>{
+    const inP=m.inP??0,outP=m.outP??0;
+    const grade=m.grade||calcGrade(inP,outP);
+    const gc={S:'var(--s-green)',A:'var(--a-green)',B:'var(--b-amber)',C:'var(--c-orange)',D:'var(--d-red)'}[grade]||'var(--b-amber)';
+    const cost=costs[i];
+    const pct=maxCost>0?(cost/maxCost)*100:0;
+    const isActive=genModelId===m.id;
+    const costStr=inP===0?'FREE':cost<0.00001?'<$0.00001':'$'+cost.toFixed(5);
+    return`<div class="cmp-model-col${isActive?' active':''}" onclick="setGenModel('${m.id}')">
+      <div class="cmc-top">
+        <div class="cmc-name">${m.name.replace(/claude\s/i,'').replace(/gemini\s/i,'G ').replace(/gpt-/i,'GPT-')}</div>
+        <div class="cmc-grade grade ${grade}" style="color:${gc};">${grade}</div>
+      </div>
+      <div class="cmc-cost">${costStr}</div>
+      <div class="cmc-bar-wrap"><div class="cmc-bar" style="width:${pct.toFixed(1)}%;background:${gc};"></div></div>
+      <div class="cmc-label"><span>${inP===0?'FREE':'$'+inP+'/M'}</span>${isActive?'<span style="color:var(--dk-gold);">▶</span>':''}</div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
 //  OLLAMA
 // ============================================================
 async function detectOllama(){
-  const pulse=document.getElementById('ol-pulse'),status=document.getElementById('ol-status');
-  pulse.className='pulse';status.textContent=t('ollama_ing');
   try{
     const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),3000);
     const res=await fetch('http://localhost:11434/api/tags',{signal:ctrl.signal});
     const data=await res.json();const models=data.models||[];
-    ollamaModels=models.map(m=>({id:'ollama-'+m.name.replace(/[^a-z0-9]/gi,'-'),prov:'ollama',name:m.name,grade:'S',inP:0,outP:0,speed:80,qual:75,embed:'nomic-embed-text',tags:['Local','Ollama'],desc:{ja:`インストール済みOllamaモデル${m.size?` (${(m.size/1e9).toFixed(1)}GB)`:''}`,en:`Installed Ollama model${m.size?` (${(m.size/1e9).toFixed(1)}GB)`:''}`},local:true}));
-    pulse.className='pulse on';status.textContent=t('ollama_ok',{n:models.length});
+    ollamaModels=models.map(m=>({id:'ollama-'+m.name.replace(/[^a-z0-9]/gi,'-'),provider:'ollama',prov:'ollama',name:m.name,grade:'S',inP:0,outP:0,speed:80,quality:75,qual:75,embed:'nomic-embed-text',tags:['Local','Ollama'],desc:{ja:`Ollama: ${m.name}`,en:`Ollama: ${m.name}`},local:true}));
+    const srcBar=document.getElementById('src-bar');
+    if(srcBar&&models.length>0){const d=document.createElement('div');d.className='src-item';d.innerHTML=`<div class="src-dot ok"></div><span>Ollama (${models.length})</span>`;srcBar.appendChild(d);}
     buildProvTabs();renderModels();
-  }catch{pulse.className='pulse off';status.textContent=t('ollama_ng');}
+  }catch{}
 }
 
 // ============================================================
 //  CLOUD FETCH
 // ============================================================
 function setSt(p,msg,cls=''){const el=document.getElementById('status-'+p);if(el){el.textContent=msg;el.className='upd-st '+cls;}}
-
-async function fetchOpenAI(){
-  const key=document.getElementById('key-openai').value.trim();
-  if(!key){setSt('openai',lang==='ja'?'APIキーを入力してください':'Enter API key','err');return;}
-  setSt('openai',lang==='ja'?'取得中...':'Fetching...','loading');
-  try{
-    const res=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});
-    const data=await res.json();
-    if(data.error){setSt('openai','Error: '+data.error.message,'err');return;}
-    const models=(data.data||[]).filter(m=>m.id.match(/^(gpt-|o[0-9])/)).sort((a,b)=>b.created-a.created).map(m=>{
-      const pr=lkPrice(m.id)||{inP:2.50,outP:10.0};
-      return{id:m.id,prov:'openai',name:m.id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:75,qual:lkQual(m.id),embed:'text-embedding-3-small',tags:['OpenAI','LIVE'],desc:{ja:pr.inP?'':'価格は概算です。',en:pr.inP?'':'Price is estimated.'},fetched:true};
-    });
-    fetchedModels.openai=models;_saveFetched();
-    setSt('openai',`✓ ${models.length} ${lang==='ja'?'モデル取得':'models fetched'} (${new Date().toLocaleTimeString()})','ok`);
-    // fix: rebuild
-    setSt('openai',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');
-    buildProvTabs();renderModels();
-  }catch(e){setSt('openai',(lang==='ja'?'接続エラー: ':'Error: ')+e.message,'err');}
-}
-
-async function fetchGoogle(){
-  const key=document.getElementById('key-google').value.trim();
-  if(!key){setSt('google',lang==='ja'?'APIキーを入力してください':'Enter API key','err');return;}
-  setSt('google',lang==='ja'?'取得中...':'Fetching...','loading');
-  try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
-    const data=await res.json();
-    if(data.error){setSt('google','Error: '+data.error.message,'err');return;}
-    const models=(data.models||[]).filter(m=>m.name.includes('gemini')).map(m=>{
-      const id=m.name.replace('models/','');const pr=lkPrice(id)||{inP:0.30,outP:2.50};
-      return{id,prov:'google',name:m.displayName||id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:85,qual:lkQual(id),embed:'text-embedding-004',tags:['Google','LIVE'],desc:{ja:m.description||'',en:m.description||''},fetched:true};
-    });
-    fetchedModels.google=models;_saveFetched();
-    setSt('google',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');
-    buildProvTabs();renderModels();
-  }catch(e){setSt('google',(lang==='ja'?'接続エラー: ':'Error: ')+e.message,'err');}
-}
-
-async function fetchMistral(){
-  const key=document.getElementById('key-mistral').value.trim();
-  if(!key){setSt('mistral',lang==='ja'?'APIキーを入力してください':'Enter API key','err');return;}
-  setSt('mistral',lang==='ja'?'取得中...':'Fetching...','loading');
-  try{
-    const res=await fetch('https://api.mistral.ai/v1/models',{headers:{'Authorization':'Bearer '+key}});
-    const data=await res.json();
-    if(!data.data){setSt('mistral',lang==='ja'?'CORS制限の可能性':'Possible CORS restriction','err');return;}
-    const models=data.data.map(m=>{const pr=lkPrice(m.id)||{inP:0.20,outP:0.60};return{id:m.id,prov:'mistral',name:m.id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:80,qual:lkQual(m.id),embed:'mistral-embed',tags:['Mistral','LIVE'],desc:{ja:'',en:''},fetched:true};});
-    fetchedModels.mistral=models;_saveFetched();
-    setSt('mistral',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');
-    buildProvTabs();renderModels();
-  }catch(e){setSt('mistral',(lang==='ja'?'エラー (CORS): ':'Error (CORS): ')+e.message,'err');}
-}
-
+async function fetchOpenAI(){const key=document.getElementById('key-openai').value.trim();if(!key){setSt('openai','APIキーを入力してください','err');return;}setSt('openai','取得中...','loading');try{const res=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});const data=await res.json();if(data.error){setSt('openai','Error: '+data.error.message,'err');return;}const models=(data.data||[]).filter(m=>m.id.match(/^(gpt-|o[0-9])/)).sort((a,b)=>b.created-a.created).map(m=>{const pr=lkP(m.id)||{inP:2.50,outP:10.0};return{id:m.id,provider:'openai',prov:'openai',name:m.id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:75,quality:lkQ(m.id),qual:lkQ(m.id),embed:'text-embedding-3-small',tags:['OpenAI','LIVE'],desc:{ja:'',en:''},fetched:true};});fetchedModels.openai=models;_save('dk_fetched_models',fetchedModels);setSt('openai',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');buildProvTabs();renderModels();}catch(e){setSt('openai','エラー: '+e.message,'err');}}
+async function fetchGoogle(){const key=document.getElementById('key-google').value.trim();if(!key){setSt('google','APIキーを入力してください','err');return;}setSt('google','取得中...','loading');try{const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);const data=await res.json();if(data.error){setSt('google','Error: '+data.error.message,'err');return;}const models=(data.models||[]).filter(m=>m.name.includes('gemini')).map(m=>{const id=m.name.replace('models/','');const pr=lkP(id)||{inP:0.30,outP:2.50};return{id,provider:'google',prov:'google',name:m.displayName||id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:85,quality:lkQ(id),qual:lkQ(id),embed:'text-embedding-004',tags:['Google','LIVE'],desc:{ja:m.description||'',en:m.description||''},fetched:true};});fetchedModels.google=models;_save('dk_fetched_models',fetchedModels);setSt('google',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');buildProvTabs();renderModels();}catch(e){setSt('google','エラー: '+e.message,'err');}}
+async function fetchMistral(){const key=document.getElementById('key-mistral').value.trim();if(!key){setSt('mistral','APIキーを入力してください','err');return;}setSt('mistral','取得中...','loading');try{const res=await fetch('https://api.mistral.ai/v1/models',{headers:{'Authorization':'Bearer '+key}});const data=await res.json();if(!data.data){setSt('mistral','CORS制限の可能性','err');return;}const models=data.data.map(m=>{const pr=lkP(m.id)||{inP:0.20,outP:0.60};return{id:m.id,provider:'mistral',prov:'mistral',name:m.id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:80,quality:lkQ(m.id),qual:lkQ(m.id),embed:'mistral-embed',tags:['Mistral','LIVE'],desc:{ja:'',en:''},fetched:true};});fetchedModels.mistral=models;_save('dk_fetched_models',fetchedModels);setSt('mistral',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');buildProvTabs();renderModels();}catch(e){setSt('mistral','エラー (CORS): '+e.message,'err');}}
 async function fetchAll(){await fetchOpenAI();await fetchGoogle();await fetchMistral();}
 
 // ============================================================
 //  CUSTOM MODEL
 // ============================================================
 function addCustom(){
-  const name=document.getElementById('f-name').value.trim();
-  if(!name){alert(lang==='ja'?'モデル名を入力してください':'Enter model name');return;}
+  const name=document.getElementById('f-name').value.trim();if(!name){alert('モデル名を入力してください');return;}
   const inP=parseFloat(document.getElementById('f-inp').value)||0;
   const outP=parseFloat(document.getElementById('f-out').value)||0;
-  customModels.push({
-    id:'custom-'+Date.now(), prov:document.getElementById('f-prov').value, name,
-    grade:calcGrade(inP,outP), inP, outP,
-    speed:+document.getElementById('f-speed').value, qual:+document.getElementById('f-qual').value,
-    embed:document.getElementById('f-embed').value||'—',
-    tags:document.getElementById('f-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
-    desc:{ja:document.getElementById('f-desc').value, en:document.getElementById('f-desc').value},
-    local:!!document.getElementById('f-local').value, custom:true,
-  });
-  _saveCustom();closeModal('add-overlay');buildProvTabs();renderModels();
+  customModels.push({id:'custom-'+Date.now(),provider:document.getElementById('f-prov').value,prov:document.getElementById('f-prov').value,name,grade:calcGrade(inP,outP),inP,outP,speed:+document.getElementById('f-speed').value,quality:+document.getElementById('f-qual').value,qual:+document.getElementById('f-qual').value,embed:document.getElementById('f-embed').value||'—',tags:document.getElementById('f-tags').value.split(',').map(s=>s.trim()).filter(Boolean),desc:{ja:document.getElementById('f-desc').value,en:document.getElementById('f-desc').value},local:!!document.getElementById('f-local').value,custom:true});
+  _save('dk_custom_models',customModels);closeModal('add-overlay');buildProvTabs();renderModels();
 }
 
 // ============================================================
@@ -937,60 +934,40 @@ function onSlide(){
 // ============================================================
 //  CHUNKS
 // ============================================================
-function splitChunks(text,size,overlap){
-  if(!text.trim())return[];
-  const r=[],step=Math.max(1,size-overlap);
-  for(let i=0;i<text.length;){const c=text.slice(i,i+size);if(c.trim().length>5)r.push(c);if(i+size>=text.length)break;i+=step;}
-  return r;
-}
+function splitChunks(text,size,overlap){if(!text.trim())return[];const r=[],step=Math.max(1,size-overlap);for(let i=0;i<text.length;){const c=text.slice(i,i+size);if(c.trim().length>5)r.push(c);if(i+size>=text.length)break;i+=step;}return r;}
 
 function updateAll(){
   const text=document.getElementById('txt').value;
-  const size=+document.getElementById('sl-cs').value, ovlp=+document.getElementById('sl-ov').value;
-  const chars=text.length, toks=Math.round(chars/3);
+  const size=+document.getElementById('sl-cs').value,ovlp=+document.getElementById('sl-ov').value;
+  const chars=text.length,toks=Math.round(chars/3);
   document.getElementById('char-row').textContent=t('char_row',{n:chars.toLocaleString(),t:toks.toLocaleString()});
   chunks=splitChunks(text,size,ovlp);
   document.getElementById('s-chunks').textContent=chunks.length;
   document.getElementById('s-chars').textContent=chars>0?chars.toLocaleString():'0';
-  if(selModel&&chunks.length>0){const c=selModel.inP===0?0:(toks/1000)*0.00002;document.getElementById('s-cost').textContent=c===0?'FREE':c<0.0001?'<$0.0001':'$'+c.toFixed(5);}
+  const gm=genModelId?findModel(genModelId):null;
+  if(gm&&chunks.length>0){const c=gm.inP===0?0:(toks/1e6)*gm.inP;document.getElementById('s-cost').textContent=c===0?'FREE':c<0.00001?'<$0.00001':'$'+c.toFixed(5);}
   else document.getElementById('s-cost').textContent='—';
+  renderCmpTable();
   updateCopas();renderChunkPreview();
-  document.getElementById('gen-btn').disabled=!(chunks.length>0&&selModel);
+  document.getElementById('gen-btn').disabled=!(chunks.length>0&&genModelId);
 }
 
-function updateCopas(){
-  const el=document.getElementById('copas-inner');
-  if(!selModel){el.innerHTML=`<div style="font-size:11px;color:var(--dk-text3);">${t('copas_none')}</div>`;return;}
-  const m=selModel,gc={S:'var(--s-green)',A:'var(--a-green)',B:'var(--b-amber)',C:'var(--c-orange)'}[m.grade]||'var(--b-amber)';
-  const desc=typeof m.desc==='object'?(m.desc[lang]||m.desc.en||''):m.desc||'';
-  el.innerHTML=`<div class="copas-row"><div class="copas-g ${m.grade}" style="color:${gc};">${m.grade}</div>
-    <div><div style="font-size:12px;font-weight:500;color:var(--dk-text);margin-bottom:2px;">${m.name} · ${t('grade_'+m.grade)}</div>
-    <div class="copas-desc">${desc}</div></div></div>
-    <div class="copas-meta">Embedding: ${m.embed}<br>
-    ${lang==='ja'?'入力':'Input'}: ${m.inP===0?'FREE (Local)':'$'+m.inP+'/MTok'} · ${lang==='ja'?'出力':'Output'}: ${m.outP===0?'FREE (Local)':'$'+m.outP+'/MTok'}</div>`;
-}
+function updateCopas(){}  // merged into cmp table
 
+// ============================================================
+//  CHUNK PREVIEW
+// ============================================================
 function renderChunkPreview(){
   const el=document.getElementById('chunk-preview');
   if(chunks.length===0){el.innerHTML=`<div class="empty-state">${t('preview_empty')}</div>`;return;}
-  el.innerHTML=chunks.slice(0,3).map((c,i)=>`
-    <div class="chunk-c">
-      <div class="chunk-n">${t('chunk_label',{i:i+1,total:chunks.length})}</div>
-      <div class="chunk-t">${esc(c.slice(0,110))}${c.length>110?'…':''}</div>
-      <div class="chunk-s">${c.length}${lang==='ja'?'文字':' chars'} · ~${Math.round(c.length/3)} tok</div>
-    </div>`).join('')+(chunks.length>3?`<div style="font-size:10px;color:var(--dk-text3);text-align:center;padding:4px 0;">${t('preview_more',{n:chunks.length-3})}</div>`:'');
+  el.innerHTML=chunks.slice(0,3).map((c,i)=>`<div class="chunk-c"><div class="chunk-n">${t('chunk_label',{i:i+1,total:chunks.length})}</div><div class="chunk-t">${esc(c.slice(0,110))}${c.length>110?'…':''}</div><div class="chunk-s">${c.length}${lang==='ja'?'文字':' chars'} · ~${Math.round(c.length/3)} tok</div></div>`).join('')+(chunks.length>3?`<div style="font-size:10px;color:var(--dk-text3);text-align:center;padding:4px 0;">${t('preview_more',{n:chunks.length-3})}</div>`:'');
 }
 
 // ============================================================
 //  FORMATS
 // ============================================================
 function renderFormats(){
-  document.getElementById('fmt-grid').innerHTML=FORMATS.map(f=>`
-    <div class="fmt-btn${f.id===selFmt?' active':''}" onclick="selFormat('${f.id}')">
-      <div class="fmt-name">${f.name}<span style="font-size:9px;opacity:.55;margin-left:3px;">${f.ext}</span></div>
-      <div class="fmt-desc">${typeof f.desc==='object'?(f.desc[lang]||f.desc.en):f.desc}</div>
-      ${f.rec?`<div class="fmt-rec">${t('fmt_rec')}</div>`:''}
-    </div>`).join('');
+  document.getElementById('fmt-grid').innerHTML=FORMATS.map(f=>`<div class="fmt-btn${f.id===selFmt?' active':''}" onclick="selFormat('${f.id}')"><div class="fmt-name">${f.name}<span style="font-size:9px;opacity:.55;margin-left:3px;">${f.ext}</span></div><div class="fmt-desc">${typeof f.desc==='object'?(f.desc[lang]||f.desc.en):f.desc}</div>${f.rec?`<div class="fmt-rec">${t('fmt_rec')}</div>`:''}</div>`).join('');
 }
 function selFormat(id){selFmt=id;renderFormats();updateFmtBtn();}
 function updateFmtBtn(){
@@ -1003,46 +980,57 @@ function updateFmtBtn(){
 //  GENERATE
 // ============================================================
 function doGenerate(){
-  if(!chunks.length||!selModel)return;
-  const m=selModel,size=+document.getElementById('sl-cs').value;
-  const ovlp=+document.getElementById('sl-ov').value,topk=+document.getElementById('sl-tk').value;
+  if(!chunks.length||!genModelId)return;
+  const m=findModel(genModelId);if(!m)return;
+  const size=+document.getElementById('sl-cs').value,ovlp=+document.getElementById('sl-ov').value,topk=+document.getElementById('sl-tk').value;
   const text=document.getElementById('txt').value,toks=Math.round(text.length/3);
-  const meta={generator:'dkstudio RAG Data Generator',copyright:'© dkstudio (dkstudio.jp) — MIT License',
-    purpose:'For Personal AI OS',generated_at:new Date().toISOString(),
-    model:m.id,model_name:m.name,provider:m.prov,embed_model:m.embed,copas_grade:m.grade,
-    settings:{chunk_size:size,overlap:ovlp,top_k:topk},
-    stats:{total_chars:text.length,total_tokens_est:toks,total_chunks:chunks.length}};
+  const meta={generator:'dkstudio RAG Data Generator v2.0.0',copyright:'© dkstudio (dkstudio.jp) — MIT License',purpose:'For Personal AI OS',generated_at:new Date().toISOString(),model:m.id,model_name:m.name,provider:m.provider||m.prov,embed_model:m.embed,copas_grade:m.grade||calcGrade(m.inP??0,m.outP??0),settings:{chunk_size:size,overlap:ovlp,top_k:topk},stats:{total_chars:text.length,total_tokens_est:toks,total_chunks:chunks.length}};
   ({json:gJSON,jsonl:gJSONL,md:gMD,txt:gTXT,csv:gCSV,xlsx:gXLSX,xml:gXML,yaml:gYAML})[selFmt](meta);
 }
 function dl(c,f,tp){const b=new Blob([c],{type:tp}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=f;a.click();URL.revokeObjectURL(u);}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function gJSON(m){dl(JSON.stringify({...m,chunks:chunks.map((c,i)=>({id:i,text:c,chars:c.length,tokens_est:Math.round(c.length/3)}))},null,2),'rag-data.json','application/json');}
 function gJSONL(m){dl(chunks.map((c,i)=>JSON.stringify({id:i,text:c,chars:c.length,tokens_est:Math.round(c.length/3),model:m.model})).join('\n'),'rag-data.jsonl','application/x-ndjson');}
-function gMD(m){let o=`# RAG Data — ${m.model_name}\n\n<!-- ${m.copyright} -->\n\n> ${m.generated_at} · ${m.stats.total_chunks} chunks · Grade ${m.copas_grade}\n\n---\n\n`;chunks.forEach((c,i)=>{o+=`## Chunk ${i+1}\n\n${c}\n\n---\n\n`;});dl(o,'rag-data.md','text/markdown');}
-function gTXT(m){let o=`RAG Data Generator — dkstudio (${m.copyright})\nModel: ${m.model_name} | Chunks: ${m.stats.total_chunks}\n${'='.repeat(50)}\n\n`;chunks.forEach((c,i)=>{o+=`[CHUNK ${i+1}/${chunks.length}]\n${c}\n\n${'—'.repeat(30)}\n\n`;});dl(o,'rag-data.txt','text/plain');}
+function gMD(m){let o=`# RAG Data — ${m.model_name}\n\n<!-- ${m.copyright} -->\n\n> ${m.generated_at} · ${m.stats.total_chunks} chunks\n\n---\n\n`;chunks.forEach((c,i)=>{o+=`## Chunk ${i+1}\n\n${c}\n\n---\n\n`;});dl(o,'rag-data.md','text/markdown');}
+function gTXT(m){let o=`RAG Data Generator — dkstudio\nModel: ${m.model_name}\n${'='.repeat(50)}\n\n`;chunks.forEach((c,i)=>{o+=`[CHUNK ${i+1}/${chunks.length}]\n${c}\n\n${'—'.repeat(30)}\n\n`;});dl(o,'rag-data.txt','text/plain');}
 function gCSV(){dl([['id','text','chars','tokens_est'],...chunks.map((c,i)=>[i,'"'+c.replace(/"/g,'""')+'"',c.length,Math.round(c.length/3)])].map(r=>r.join(',')).join('\n'),'rag-data.csv','text/csv');}
 function gXML(m){let o=`<?xml version="1.0" encoding="UTF-8"?>\n<!-- ${m.copyright} -->\n<ragData>\n  <meta model="${m.model}" grade="${m.copas_grade}" generated="${m.generated_at}"/>\n  <chunks total="${chunks.length}">\n`;chunks.forEach((c,i)=>{o+=`    <chunk id="${i}" chars="${c.length}"><![CDATA[${c}]]></chunk>\n`;});o+='  </chunks>\n</ragData>';dl(o,'rag-data.xml','application/xml');}
 function gYAML(m){let o=`# ${m.copyright}\ngenerated_at: "${m.generated_at}"\nmodel: ${m.model}\nchunks:\n`;chunks.forEach((c,i)=>{o+=`  - id: ${i}\n    chars: ${c.length}\n    text: |\n`;c.split('\n').forEach(l=>{o+=`      ${l}\n`;});});dl(o,'rag-data.yaml','text/yaml');}
-function gXLSX(m){
-  if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return;}
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([['id','text','chars','tokens_est'],...chunks.map((c,i)=>[i,c,c.length,Math.round(c.length/3)])]);
-  ws['!cols']=[{wch:5},{wch:80},{wch:8},{wch:11}];XLSX.utils.book_append_sheet(wb,'Chunks',ws);
-  const ws2=XLSX.utils.aoa_to_sheet([['Key','Value'],['generator',m.generator],['copyright',m.copyright],['model',m.model_name],['grade',m.copas_grade],['chunks',m.stats.total_chunks],['chars',m.stats.total_chars],['chunk_size',m.settings.chunk_size],['overlap',m.settings.overlap],['top_k',m.settings.top_k]]);
-  ws2['!cols']=[{wch:20},{wch:40}];XLSX.utils.book_append_sheet(wb,'Metadata',ws2);
-  XLSX.writeFile(wb,'rag-data.xlsx');
-}
+function gXLSX(m){if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return;}const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([['id','text','chars','tokens_est'],...chunks.map((c,i)=>[i,c,c.length,Math.round(c.length/3)])]);ws['!cols']=[{wch:5},{wch:80},{wch:8},{wch:11}];XLSX.utils.book_append_sheet(wb,'Chunks',ws);const ws2=XLSX.utils.aoa_to_sheet([['Key','Value'],['generator',m.generator],['copyright',m.copyright],['model',m.model_name],['grade',m.copas_grade],['chunks',m.stats.total_chunks],['chars',m.stats.total_chars],['chunk_size',m.settings.chunk_size],['overlap',m.settings.overlap],['top_k',m.settings.top_k]]);ws2['!cols']=[{wch:20},{wch:40}];XLSX.utils.book_append_sheet(wb,'Metadata',ws2);XLSX.writeFile(wb,'rag-data.xlsx');}
 
 // ============================================================
 //  INIT
 // ============================================================
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
   loadStorage();
   checkFirstVisit();
-  applyI18n();     // applies i18n + initial renders
-  detectOllama();
+
+  // Load builtin from models.json if available, else use embedded
+  builtinModels=[
+    {id:'claude-opus-4-7',provider:'anthropic',prov:'anthropic',name:'Claude Opus 4.7',grade:'B',inP:5.00,outP:25.0,speed:58,quality:99,qual:99,embed:'Voyage AI',tags:['Best Quality','Complex'],desc:{ja:'品質最優先。高付加価値コンテンツ向け。',en:'Top quality. For high-value content.'},_src:'builtin'},
+    {id:'claude-sonnet-4-6',provider:'anthropic',prov:'anthropic',name:'Claude Sonnet 4.6',grade:'B',inP:3.00,outP:15.0,speed:74,quality:92,qual:92,embed:'Voyage AI',tags:['Balanced','Production'],desc:{ja:'品質×コストのベスト。本番の定番。',en:'Best quality-cost balance.'},_src:'builtin'},
+    {id:'claude-haiku-4-5',provider:'anthropic',prov:'anthropic',name:'Claude Haiku 4.5',grade:'A',inP:1.00,outP:5.00,speed:88,quality:82,qual:82,embed:'Voyage AI',tags:['Fast','Affordable'],desc:{ja:'Claude系最安。日本語に強い。',en:'Most affordable Claude.'},_src:'builtin'},
+    {id:'gpt-4o',provider:'openai',prov:'openai',name:'GPT-4o',grade:'B',inP:2.50,outP:10.0,speed:73,quality:91,qual:91,embed:'text-emb-3-large',tags:['High Performance','Versatile'],desc:{ja:'GPT系最高峰。',en:'Top GPT model.'},_src:'builtin'},
+    {id:'gpt-4o-mini',provider:'openai',prov:'openai',name:'GPT-4o mini',grade:'S',inP:0.15,outP:0.60,speed:91,quality:78,qual:78,embed:'text-emb-3-small',tags:['Best Value','High Volume'],desc:{ja:'OpenAI最安。大量処理向け。',en:'OpenAI most affordable.'},_src:'builtin'},
+    {id:'gemini-2-5-flash',provider:'google',prov:'google',name:'Gemini 2.5 Flash',grade:'A',inP:0.30,outP:2.50,speed:86,quality:85,qual:85,embed:'text-embedding-004',tags:['Balanced','Fast'],desc:{ja:'速度と品質のバランス。',en:'Speed and quality balance.'},_src:'builtin'},
+    {id:'gemini-flash-lite',provider:'google',prov:'google',name:'Gemini Flash-Lite',grade:'S',inP:0.10,outP:0.40,speed:96,quality:72,qual:72,embed:'text-embedding-004',tags:['Cheapest','Ultra Fast'],desc:{ja:'最安値。常時稼働に。',en:'Lowest cost.'},_src:'builtin'},
+    {id:'mistral-small',provider:'mistral',prov:'mistral',name:'Mistral Small',grade:'A',inP:0.20,outP:0.60,speed:86,quality:75,qual:75,embed:'mistral-embed',tags:['Affordable','EU'],desc:{ja:'Mistral系最安。',en:'Most affordable Mistral.'},_src:'builtin'},
+    {id:'llama3-3-70b',provider:'meta',prov:'meta',name:'Llama 3.3 70B',grade:'S',inP:0,outP:0,speed:75,quality:84,qual:84,embed:'nomic-embed-text',tags:['Free','Open Source'],desc:{ja:'Meta製最高峰。Ollama経由で利用可能。',en:"Meta's best. Via Ollama."},local:true,_src:'builtin'},
+  ];
+
+  applyI18n();
+  renderFormats();
+  updateFmtBtn();
+  renderCmpChips();
+  renderCmpTable();
+
   document.getElementById('txt').addEventListener('input',updateAll);
   updateAll();
+
+  // Auto-load GitHub models
+  loadGitHubModels(false);
+  // Auto-detect Ollama
+  detectOllama();
 });
 </script>
 </body>
