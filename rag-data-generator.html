@@ -239,6 +239,85 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 .toggle input:checked + .toggle-track{background:var(--dk-accent);}
 .toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
 .toggle input:checked ~ .toggle-thumb{transform:translateX(16px);}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .app {
+    grid-template-rows: 48px 1fr 22px;
+    height: auto;
+    min-height: 100vh;
+  }
+  .hdr {
+    padding: 0 10px;
+    gap: 5px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .hdr-logo { font-size: 11px; }
+  .hdr-ver  { display: none; }
+  .hdr-svc  { display: none; }
+  .hdiv     { display: none; }
+  .priv-badge { display: none; }
+  .hdr-db   { display: none; }
+  .clear-btn { font-size: 9px; padding: 2px 7px; }
+
+  .cols {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+    overflow: visible;
+  }
+  .col {
+    overflow: visible;
+    max-height: none;
+    border-right: none !important;
+    border-left:  none !important;
+  }
+  .col-l { border-bottom: 2px solid var(--dk-gold); }
+  .col-c { border-bottom: 1px solid var(--dk-border); }
+
+  .pb {
+    max-height: none;
+    overflow: visible;
+    padding: 10px;
+  }
+
+  /* Left panel: model list scrollable */
+  #llm-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  /* Right panel: chunk preview shorter */
+  .cmp-model-cols {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  #chunk-preview .chunk-c { display: none; }
+  #chunk-preview .chunk-c:first-child { display: block; }
+
+  /* Formats: 2 col is fine */
+  .fmt-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Stats */
+  .stat-row { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Footer */
+  .footer { font-size: 9px; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+  /* Phase headers */
+  .ph { padding: 8px 10px; }
+  .ph-title { font-size: 9px; }
+  .ph-acts-full { gap: 3px; }
+  .sm-btn { font-size: 9px; padding: 2px 7px; }
+}
+
+@media (max-width: 480px) {
+  .cmp-model-cols { grid-template-columns: 1fr !important; }
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .fmt-grid { grid-template-columns: 1fr 1fr; }
+  #llm-list { max-height: 260px; }
+}
+
 </style>
 </head>
 <body>
