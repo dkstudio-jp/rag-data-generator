@@ -1,5 +1,5 @@
 <!--
-  dkstudio RAG Data Generator v2.0.0
+  dkstudio RAG Data Generator v3.0.0
   MIT License — Copyright (c) 2026 dkstudio (dkstudio.jp)
   github.com/dkstudio-jp/rag-data-generator
 -->
@@ -8,7 +8,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RAG Data Generator v2 — dkstudio</title>
+<title>RAG Data Generator v3 — dkstudio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -68,6 +68,7 @@ input,textarea,select{font-family:inherit;}
 .src-dot.ok{background:var(--s-green);}
 .src-dot.loading{background:var(--dk-gold);}
 .src-dot.err{background:var(--c-orange);}
+.src-dot.idle{background:var(--dk-border2);}
 
 /* Comparison selected bar */
 .cmp-bar{padding:6px 10px;border-bottom:1px solid var(--dk-border);background:var(--dk-bg3);flex-shrink:0;}
@@ -113,6 +114,15 @@ input,textarea,select{font-family:inherit;}
 .set-gen-btn.active{background:var(--dk-gold);border-color:var(--dk-gold);color:#1a1204;}
 .del-btn{background:none;border:none;color:var(--dk-text3);cursor:pointer;font-size:13px;padding:0 2px;}
 .del-btn:hover{color:var(--d-red);}
+.edit-btn{flex:0 0 auto;font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid var(--dk-border2);background:none;color:var(--dk-text2);cursor:pointer;transition:all .12s;}
+.edit-btn:hover{border-color:var(--dk-main);color:var(--dk-text);}
+.b-est{background:#2a2418;color:var(--dk-gold);}
+.b-edit{background:#2a2a3a;color:#9090cc;}
+.lc-desc{font-size:10px;color:var(--dk-text3);margin:5px 0 3px;line-height:1.5;}
+.type-note{font-size:10px;color:var(--dk-text3);line-height:1.6;padding:7px 10px;border-bottom:1px solid var(--dk-border);flex-shrink:0;}
+.cmc-ctx{font-size:9px;color:var(--dk-text3);margin-top:2px;}
+.cmc-ctx.warn{color:var(--c-orange);}
+.fg input:disabled,.fg select:disabled{opacity:.5;cursor:not-allowed;}
 
 /* Prov filter */
 .prov-bar{display:flex;gap:2px;padding:6px 10px;border-bottom:1px solid var(--dk-border);flex-wrap:wrap;flex-shrink:0;}
@@ -339,7 +349,7 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
   <div class="hdr-logo">dk<em>studio</em></div>
   <div class="hdiv"></div>
   <div class="hdr-svc">RAG Data Generator</div>
-  <div class="hdr-ver">v2.0.0</div>
+  <div class="hdr-ver">v3.0.0</div>
   <div class="hdr-tag">For Personal AI OS</div>
   <div class="lang-sw">
     <button class="lang-btn active" id="btn-ja" onclick="setLang('ja')">日本語</button>
@@ -359,19 +369,19 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 <div class="col col-l">
   <div class="ph">
     <div class="step">1</div>
-    <div class="ph-title" data-i18n="step1">LLMを選ぶ</div>
+    <div class="ph-title" data-i18n="step1">利用タイプを選ぶ</div>
     <div class="ph-badge" id="model-count">—</div>
     <div class="ph-acts-full">
       <button class="sm-btn gold" onclick="openModal('update-overlay')" data-i18n="btn_update">☁ 更新</button>
       <button class="sm-btn gold" onclick="openModal('json-overlay')">📂 JSON</button>
-      <button class="sm-btn" onclick="openModal('add-overlay')" data-i18n="btn_manual">＋ 手動</button>
+      <button class="sm-btn" onclick="openAdd()" data-i18n="btn_manual">＋ 手動</button>
     </div>
   </div>
 
   <!-- Source status bar -->
   <div class="src-bar" id="src-bar">
     <div class="src-item"><div class="src-dot ok"></div><span data-i18n="src_builtin">組み込み</span></div>
-    <div class="src-item" id="src-github"><div class="src-dot loading"></div><span>GitHub...</span></div>
+    <div class="src-item" id="src-github" style="cursor:pointer;" onclick="openModal('json-overlay');switchJsonTab('github')"><div class="src-dot idle"></div><span></span></div>
   </div>
 
   <!-- Comparison chips -->
@@ -384,6 +394,7 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 
   <!-- Provider filter -->
   <div class="prov-bar" id="prov-bar"></div>
+  <div class="type-note" data-i18n="type_note"></div>
 
   <div class="pb" id="llm-list"></div>
 </div>
@@ -458,7 +469,7 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 
 <!-- FOOTER -->
 <div class="footer">
-  <span>© dkstudio RAG Data Generator v2.0.0</span>
+  <span>© dkstudio RAG Data Generator v3.0.0</span>
   <span>·</span>
   <a href="https://github.com/dkstudio-jp/rag-data-generator" target="_blank">GitHub</a>
   <span>·</span>
@@ -472,7 +483,7 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 <!-- UPDATE MODAL -->
 <div class="overlay" id="update-overlay" onclick="bgClose(event,'update-overlay')">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr"><div class="modal-title">☁ クラウドモデルを更新</div><button class="close-x" onclick="closeModal('update-overlay')">×</button></div>
+    <div class="modal-hdr"><div class="modal-title">☁ APIからモデル一覧を取得</div><button class="close-x" onclick="closeModal('update-overlay')">×</button></div>
     <div class="modal-body">
       <div style="font-size:11px;color:var(--dk-text3);margin-bottom:13px;line-height:1.7;" data-i18n="upd_note"></div>
       <div class="upd-row"><div class="upd-prov"><span style="color:#cc785c;">●</span> Anthropic <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#2a1a14;color:#cc785c;">CORS</span></div><div class="cors-note" data-i18n="upd_anthropic_note"></div><div class="upd-st" id="status-anthropic" data-i18n="upd_curated"></div></div>
@@ -491,7 +502,7 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
     <div class="modal-hdr"><div class="modal-title">📂 モデルリストを読み込む</div><button class="close-x" onclick="closeModal('json-overlay')">×</button></div>
     <div class="modal-body">
       <div style="font-size:11px;color:var(--dk-text3);margin-bottom:12px;line-height:1.7;">
-        外部のmodels.jsonを読み込んでモデルリストを差し替え・追加できます。<br>
+        具体的なモデル名の一覧（models.json）を、タイプ別プロファイルに追加で読み込めます（任意）。<br>
         URLまたはファイルで指定してください。
       </div>
       <div class="json-tabs">
@@ -520,13 +531,15 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
       <!-- GitHub tab -->
       <div class="json-section" id="json-tab-github">
         <div style="font-size:11px;color:var(--dk-text2);line-height:1.7;margin-bottom:10px;">
-          dkstudioが管理する公式models.jsonを読み込みます。<br>
-          コミュニティがプルリクエストで更新しています。
+          dkstudioが管理する公式models.jsonを読み込みます（任意）。<br>
+          モデルと価格は変わりやすいため、読み込み後に表示される<strong>データ更新日</strong>を確認してください。<br>
+          起動時の自動読み込みは行いません。一度読み込むと、次回以降は自動で最新版に更新します。
         </div>
         <div style="font-size:11px;padding:8px;background:var(--dk-bg3);border-radius:6px;color:var(--dk-text3);margin-bottom:10px;word-break:break-all;">
           https://raw.githubusercontent.com/dkstudio-jp/rag-data-generator/main/models.json
         </div>
         <button class="sm-btn gold" style="width:100%;padding:8px;" onclick="loadGitHubModels(true)">📥 GitHubから読み込む</button>
+        <button class="sm-btn" style="width:100%;padding:7px;margin-top:6px;" onclick="unloadGitHubModels()">読み込んだ一覧を外す</button>
         <div class="json-st" id="json-gh-st"></div>
       </div>
     </div>
@@ -537,14 +550,15 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 <!-- ADD MODEL MODAL -->
 <div class="overlay" id="add-overlay" onclick="bgClose(event,'add-overlay')">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr"><div class="modal-title">＋ モデルを手動で追加</div><button class="close-x" onclick="closeModal('add-overlay')">×</button></div>
+    <div class="modal-hdr"><div class="modal-title" id="add-title">＋ プロファイルを手動で追加</div><button class="close-x" onclick="closeModal('add-overlay')">×</button></div>
     <div class="modal-body">
       <div class="fg-grid">
-        <div class="fg fg-full"><label>モデル名 *</label><input type="text" id="f-name" placeholder="例: My Custom LLM 7B"></div>
+        <div class="fg fg-full"><label>名前 *</label><input type="text" id="f-name" placeholder="例: 社内サーバーのLLM"></div>
         <div class="fg"><label>プロバイダー</label><select id="f-prov"><option value="custom">Custom</option><option value="anthropic">Anthropic</option><option value="openai">OpenAI</option><option value="google">Google</option><option value="mistral">Mistral</option><option value="meta">Meta</option><option value="ollama">Ollama</option></select></div>
         <div class="fg"><label>Embeddingモデル</label><input type="text" id="f-embed" placeholder="text-embedding-..."></div>
         <div class="fg"><label>入力コスト ($/MTok)</label><input type="number" id="f-inp" step="0.01" min="0" value="1.00"></div>
         <div class="fg"><label>出力コスト ($/MTok)</label><input type="number" id="f-out" step="0.01" min="0" value="3.00"></div>
+        <div class="fg fg-full"><label>コンテキスト長 (トークン・空欄可)</label><input type="number" id="f-ctx" step="1000" min="0" value="128000"></div>
         <div class="fg fg-full"><label>速度スコア (0–100) <span class="sp" id="sp-s">75</span></label><input type="range" id="f-speed" min="0" max="100" value="75" oninput="document.getElementById('sp-s').textContent=this.value"></div>
         <div class="fg fg-full"><label>品質スコア (0–100) <span class="sp" id="sp-q">80</span></label><input type="range" id="f-qual" min="0" max="100" value="80" oninput="document.getElementById('sp-q').textContent=this.value"></div>
         <div class="fg fg-full"><label>タグ (カンマ区切り)</label><input type="text" id="f-tags" placeholder="高品質, 日本語対応, 無料"></div>
@@ -553,7 +567,7 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
       </div>
       <div style="font-size:10px;color:var(--dk-text3);margin-top:9px;">* コストが0の場合、コスパグレードは自動でSになります。</div>
     </div>
-    <div class="modal-foot"><button class="sm-btn" onclick="closeModal('add-overlay')">キャンセル</button><button class="sm-btn gold" onclick="addCustom()" style="padding:5px 16px;">保存して追加</button></div>
+    <div class="modal-foot"><button class="sm-btn" onclick="closeModal('add-overlay')">キャンセル</button><button class="sm-btn gold" id="add-save" onclick="addCustom()" style="padding:5px 16px;">保存して追加</button></div>
   </div>
 </div>
 
@@ -595,31 +609,37 @@ input[type=range]{width:100%;accent-color:var(--dk-gold);cursor:pointer;}
 const STRINGS={
   ja:{
     hdr_clear:'全データ削除',hdr_local:'🔒 ローカル処理のみ',hdr_pm:'🛡 プライバシーモード ON',
-    step1:'LLMを選ぶ',step2:'テキスト入力 & チャンク設定',step3:'コスパ比較 & 生成',
-    src_builtin:'組み込み',
-    cmp_title:'比較中のモデル（最大4件）',
-    cmp_empty:'モデルを選んで「比較追加」を押してください',
-    cmp_table_title:'モデル別コスト比較（クリックで生成モデル選択）',
-    cmp_table_empty:'左パネルでモデルを比較追加してください',
-    btn_add_cmp:'比較追加',btn_in_cmp:'比較中',btn_set_gen:'生成に使う',btn_gen_active:'生成モデル',
-    prov_all:'すべて',prov_local:'Local',btn_update:'☁ 更新',btn_manual:'＋ 手動',
+    step1:'利用タイプを選ぶ',step2:'テキスト入力 & チャンク設定',step3:'コスパ比較 & 生成',
+    src_builtin:'タイプ別（組み込み）',
+    gh_idle:'モデル一覧: 未読込（任意）',gh_loading:'GitHub...',gh_ok:'GitHub {n}件 · {d}',gh_err:'GitHub: 未接続',
+    type_note:'モデル名を限定しない、タイプ別の目安値です。✎ で実際の単価・コンテキスト長に書き換えられます。選択は任意で、選ばなくても生成できます。',
+    cmp_title:'比較中（最大4件）',
+    cmp_empty:'タイプを選んで「比較追加」を押してください',
+    cmp_table_title:'コスト比較（クリックで基準に設定）',
+    cmp_table_empty:'左パネルで比較に追加してください',
+    btn_add_cmp:'比較追加',btn_in_cmp:'比較中',btn_set_gen:'基準にする',btn_gen_active:'基準',
+    prov_all:'すべて',prov_local:'Local',prov_type:'タイプ別',btn_update:'☁ API取得',btn_manual:'＋ 手動',
+    lbl_est:'目安',lbl_edit:'編集済',lbl_none:'該当なし',m_any:'モデル指定なし',
+    ctx_use:'top-k占有 {p}%',ctx_tip:'検索結果 約{need}トークン ／ コンテキスト {ctx}トークン',
+    add_title:'＋ プロファイルを手動で追加',edit_title:'✎ 数値を編集',add_save:'保存して追加',edit_save:'保存',
+    tip_edit:'数値を編集',tip_reset:'初期値に戻す',tip_del:'削除',
     sec_input:'入力テキスト',sec_chunk:'チャンク設定',
     txt_ph:'RAGに使いたいテキストをここに貼り付け...\n\nFAQ・マニュアル / 製品説明文 / 会社概要 / ブログ記事\nAnythingLLM・LM Studio・Ollama などの Personal AI OS 向けデータを生成します。',
     char_row:'{n}文字 · 推定 {t}トークン',unit_chars:'文字',unit_items:'件',
     sl_chunk:'チャンクサイズ',sl_chunk_hint:'小 → 精密な検索 ／ 大 → 文脈を広く保持',
     sl_overlap:'オーバーラップ',sl_overlap_hint:'チャンク間の重複（前後文脈の連続性）',
     sl_topk:'検索上限 top-k',sl_topk_hint:'回答生成時に参照するチャンク数',
-    stat_chunks:'チャンク数',stat_chars:'総文字数',stat_cost:'生成コスト',
+    stat_chunks:'チャンク数',stat_chars:'総文字数',stat_cost:'入力コスト',
     preview_label:'チャンクプレビュー',preview_empty:'テキストを入力するとプレビューが表示されます',
     preview_more:'+{n}チャンク（生成後のファイルに全件収録）',
     chunk_label:'チャンク {i} / {total}',
     fmt_label:'出力フォーマット',fmt_rec:'推奨',gen_btn:'▶ {fmt} ({ext}) で生成',
     m_cost:'コスト',m_speed:'速度',m_qual:'品質',
-    upd_note:'APIキーを入力して「取得」を押すと最新のモデル一覧を取得します。\nキーはブラウザのlocalStorageにのみ保存されます。',
+    upd_note:'APIキーを入力して「取得」を押すと、現在提供されているモデル一覧を取得します。単価はAPIから取得できないため、名前から推定した目安値が入ります（✎ で修正できます）。キーはブラウザのlocalStorageにのみ保存されます。',
     upd_fetch:'取得',upd_all:'☁ すべて更新',upd_close:'閉じる',
-    upd_anthropic_note:'Anthropic APIはブラウザからのCORSに非対応。モデルリストはキュレーション済みデータを使用。',
+    upd_anthropic_note:'Anthropic APIはブラウザからの直接取得（CORS）に非対応です。「＋ 手動」で数値を入力してください。',
     upd_cors_note:'※ MistralのAPIがCORSを許可していない場合、取得に失敗することがあります。',
-    upd_curated:'キュレーション済み · 手動更新対応',
+    upd_curated:'手動入力に対応',
     priv_h:'プライバシーと免責事項',
     priv_b1_t:'✓ データはすべてブラウザ内で処理されます',
     priv_b1_b:'入力したテキストは <strong>外部サーバーに送信されません</strong>。すべての処理はブラウザ内のみで完結します。',
@@ -630,37 +650,43 @@ const STRINGS={
     priv_disclaimer:'⚠️ 個人情報が含まれると思われるデータを使用する場合は、使用終了後にクリアボタンで全データを削除してください。このサービスを使用して生じたいかなる損害・トラブルに対して、dkstudioは一切の責任を負いません。',
     priv_mode_label:'プライバシーモード（ページを閉じたらデータを自動削除）',
     priv_accept:'内容を確認しました。使用を開始する',
-    clear_confirm:'以下のすべてのデータを削除します:\n・入力テキスト\n・APIキー\n・カスタムモデル\n・取得済みモデルキャッシュ\n\n続行しますか？',
+    clear_confirm:'以下のすべてのデータを削除します:\n・入力テキスト\n・APIキー\n・手動で追加・編集した数値\n・読み込んだモデル一覧\n\n続行しますか？',
     clear_done:'✓ データを削除しました',
-    db_status:'モデルDB: {n}件',
+    db_status:'プロファイル: {n}件',
   },
   en:{
     hdr_clear:'Clear All Data',hdr_local:'🔒 Local Processing Only',hdr_pm:'🛡 Privacy Mode ON',
-    step1:'Choose LLM',step2:'Text Input & Chunk Settings',step3:'Cost Compare & Generate',
-    src_builtin:'Built-in',
-    cmp_title:'Models in comparison (max 4)',
-    cmp_empty:'Select a model and click "Add to Compare"',
-    cmp_table_title:'Cost comparison (click to select for generation)',
-    cmp_table_empty:'Add models to compare from the left panel',
-    btn_add_cmp:'Compare',btn_in_cmp:'In Compare',btn_set_gen:'Use for Gen',btn_gen_active:'Active',
-    prov_all:'All',prov_local:'Local',btn_update:'☁ Update',btn_manual:'＋ Manual',
+    step1:'Choose a usage type',step2:'Text Input & Chunk Settings',step3:'Cost Compare & Generate',
+    src_builtin:'Built-in types',
+    gh_idle:'Model list: not loaded (optional)',gh_loading:'GitHub...',gh_ok:'GitHub {n} · {d}',gh_err:'GitHub: offline',
+    type_note:'Model-agnostic profiles with typical values. Use ✎ to enter real prices and context length. Selection is optional — you can generate without it.',
+    cmp_title:'In comparison (max 4)',
+    cmp_empty:'Pick a type and click "Compare"',
+    cmp_table_title:'Cost comparison (click to set as reference)',
+    cmp_table_empty:'Add profiles from the left panel',
+    btn_add_cmp:'Compare',btn_in_cmp:'In Compare',btn_set_gen:'Set as ref.',btn_gen_active:'Reference',
+    prov_all:'All',prov_local:'Local',prov_type:'Types',btn_update:'☁ Fetch',btn_manual:'＋ Manual',
+    lbl_est:'Typical',lbl_edit:'Edited',lbl_none:'No matches',m_any:'Model-agnostic',
+    ctx_use:'top-k uses {p}%',ctx_tip:'Retrieved text ≈ {need} tokens / context {ctx} tokens',
+    add_title:'＋ Add a profile manually',edit_title:'✎ Edit values',add_save:'Save & add',edit_save:'Save',
+    tip_edit:'Edit values',tip_reset:'Reset to default',tip_del:'Delete',
     sec_input:'Input Text',sec_chunk:'Chunk Settings',
     txt_ph:'Paste text for RAG here...\n\nFAQ / Manuals / Product info / Blog articles\nGenerates data for Personal AI OS: AnythingLLM, LM Studio, Ollama, etc.',
     char_row:'{n} chars · est. {t} tokens',unit_chars:' chars',unit_items:'',
     sl_chunk:'Chunk Size',sl_chunk_hint:'Small → precise retrieval ／ Large → broader context',
     sl_overlap:'Overlap',sl_overlap_hint:'Overlap between chunks (context continuity)',
     sl_topk:'Top-K Limit',sl_topk_hint:'Number of chunks retrieved per query',
-    stat_chunks:'Chunks',stat_chars:'Total Chars',stat_cost:'Gen Cost',
+    stat_chunks:'Chunks',stat_chars:'Total Chars',stat_cost:'Input Cost',
     preview_label:'Chunk Preview',preview_empty:'Enter text to see chunk preview',
     preview_more:'+{n} more chunks (all included in output)',
     chunk_label:'Chunk {i} / {total}',
     fmt_label:'Output Format',fmt_rec:'Rec.',gen_btn:'▶ Generate {fmt} ({ext})',
     m_cost:'Cost',m_speed:'Speed',m_qual:'Quality',
-    upd_note:'Enter your API key and click Fetch to get the latest model list.\nKeys are stored in browser localStorage only.',
+    upd_note:'Enter your API key and click Fetch to get the models currently offered. Prices are not available from the API, so typical values are guessed from the name (fix them with ✎). Keys are stored in browser localStorage only.',
     upd_fetch:'Fetch',upd_all:'☁ Update All',upd_close:'Close',
-    upd_anthropic_note:'Anthropic API does not support browser CORS. Model list uses curated data.',
+    upd_anthropic_note:'The Anthropic API cannot be called directly from a browser (CORS). Use "＋ Manual" to enter values.',
     upd_cors_note:'※ Mistral fetch may fail if their API does not allow CORS.',
-    upd_curated:'Curated · Manual update supported',
+    upd_curated:'Manual entry supported',
     priv_h:'Privacy & Disclaimer',
     priv_b1_t:'✓ All data processed in your browser',
     priv_b1_b:'Your input text is <strong>never sent to any external server</strong>. All processing happens locally in your browser.',
@@ -671,9 +697,9 @@ const STRINGS={
     priv_disclaimer:'⚠️ If you are processing personal or sensitive data, please use the Clear button after use. dkstudio accepts no responsibility for any damages arising from use of this service.',
     priv_mode_label:'Privacy Mode (auto-delete all data when page closes)',
     priv_accept:'I understand. Start using the service.',
-    clear_confirm:'Delete all of the following?\n• Input text\n• API keys\n• Custom models\n• Cached model data\n\nContinue?',
+    clear_confirm:'Delete all of the following?\n• Input text\n• API keys\n• Manually added or edited values\n• Loaded model lists\n\nContinue?',
     clear_done:'✓ All data cleared',
-    db_status:'{n} models',
+    db_status:'{n} profiles',
   }
 };
 
@@ -683,6 +709,7 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset['i18nHtml']));
   const tx=document.getElementById('txt');if(tx)tx.placeholder=t('txt_ph');
+  renderGhStatus();
   renderModels();buildProvTabs();renderCmpChips();renderCmpTable();renderFormats();updateFmtBtn();updateCopas();renderChunkPreview();
   document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
 }
@@ -691,12 +718,37 @@ function setLang(l){lang=l;document.getElementById('btn-ja').classList.toggle('a
 // ============================================================
 //  DATA
 // ============================================================
-const PROV_META={anthropic:{name:'Anthropic',clr:'#cc785c'},openai:{name:'OpenAI',clr:'#10a37f'},google:{name:'Google',clr:'#4285f4'},mistral:{name:'Mistral',clr:'#f97316'},meta:{name:'Meta',clr:'#0668e1'},ollama:{name:'Ollama',clr:'#7a9085'},custom:{name:'Custom',clr:'#9090cc'}};
-const PRICE_MAP={'claude-opus-4':{inP:5.00,outP:25.0},'claude-sonnet-4':{inP:3.00,outP:15.0},'claude-haiku-4':{inP:1.00,outP:5.00},'gpt-4o':{inP:2.50,outP:10.0},'gpt-4o-mini':{inP:0.15,outP:0.60},'o3':{inP:10.0,outP:40.0},'o4-mini':{inP:1.10,outP:4.40},'gemini-2.5-pro':{inP:1.25,outP:10.0},'gemini-2.5-flash':{inP:0.30,outP:2.50},'gemini-2.5-flash-lite':{inP:0.10,outP:0.40},'gemini-2.0-flash':{inP:0.10,outP:0.40},'mistral-large':{inP:2.00,outP:6.00},'mistral-small':{inP:0.20,outP:0.60}};
-const QUAL_MAP={'claude-opus':99,'claude-sonnet':92,'claude-haiku':82,'gpt-4o':91,'gpt-4o-mini':78,'o3':99,'o4-mini':94,'gemini-2.5-pro':95,'gemini-2.5-flash':85,'gemini-2.5-flash-lite':72,'gemini-2.0':75,'mistral-large':88,'mistral-small':75};
-function lkP(id){for(const[k,v]of Object.entries(PRICE_MAP)){if(id.toLowerCase().includes(k.replace(/-latest/g,'')))return v;}return null;}
-function lkQ(id){for(const[k,v]of Object.entries(QUAL_MAP)){if(id.toLowerCase().includes(k))return v;}return 75;}
+const PROV_META={type:{name:'Type',clr:'#7a9085'},anthropic:{name:'Anthropic',clr:'#cc785c'},openai:{name:'OpenAI',clr:'#10a37f'},google:{name:'Google',clr:'#4285f4'},mistral:{name:'Mistral',clr:'#f97316'},meta:{name:'Meta',clr:'#0668e1'},ollama:{name:'Ollama',clr:'#7a9085'},custom:{name:'Custom',clr:'#9090cc'}};
+
+// Model-agnostic tiers. Values are typical ballpark figures, not any vendor's price list — every value is user-editable (✎).
+const TIER={
+  high:    {inP:5.00,outP:25.0,ctx:200000,speed:60,quality:97},
+  standard:{inP:2.50,outP:12.0,ctx:200000,speed:75,quality:90},
+  light:   {inP:0.30,outP:1.50,ctx:128000,speed:92,quality:78},
+};
+function mkType(id,tier,o){return{id,provider:'type',prov:'type',kind:'type',embed:'any',_src:'builtin',...tier,qual:tier.quality,...o};}
+const BUILTIN_TYPES=[
+  mkType('type-cloud-high',TIER.high,{name:{ja:'クラウド・高性能',en:'Cloud · High-end'},short:{ja:'高性能',en:'High-end'},tags:{ja:['品質優先','複雑な質問'],en:['Quality first','Complex queries']},desc:{ja:'各社の最上位クラス。精度が最優先の用途に。',en:'Top-tier class from any provider. For accuracy-critical use.'}}),
+  mkType('type-cloud-standard',TIER.standard,{name:{ja:'クラウド・標準',en:'Cloud · Standard'},short:{ja:'標準',en:'Standard'},tags:{ja:['バランス','日常業務'],en:['Balanced','Everyday']},desc:{ja:'品質とコストのバランス型。迷ったらここから。',en:'Balanced quality and cost. A good place to start.'}}),
+  mkType('type-cloud-light',TIER.light,{name:{ja:'クラウド・軽量',en:'Cloud · Light'},short:{ja:'軽量',en:'Light'},tags:{ja:['低コスト','大量処理'],en:['Low cost','High volume']},desc:{ja:'小型・高速クラス。大量の文書や常時稼働に。',en:'Small, fast class. For bulk documents and always-on use.'}}),
+  mkType('type-local-large',{inP:0,outP:0,ctx:32000,speed:55,quality:82},{local:true,name:{ja:'ローカル・大型',en:'Local · Large'},short:{ja:'ローカル大',en:'Local L'},tags:{ja:['無料','30B前後〜','要メモリ'],en:['Free','~30B and up','Needs RAM']},desc:{ja:'自分のPCで動かす大型モデル。API費用はかかりません。',en:'Large models running on your own machine. No API cost.'}}),
+  mkType('type-local-small',{inP:0,outP:0,ctx:8000,speed:85,quality:68},{local:true,name:{ja:'ローカル・小型',en:'Local · Small'},short:{ja:'ローカル小',en:'Local S'},tags:{ja:['無料','〜14B程度','軽快'],en:['Free','Up to ~14B','Snappy']},desc:{ja:'一般的なPCで動く小型モデル。コンテキストが短いのでtop-kに注意。',en:'Small models for ordinary hardware. Short context — watch your top-k.'}}),
+];
+const DEFAULT_CMP=['type-cloud-standard','type-cloud-light','type-local-large'];
+
+// Guess a tier from generic size words in a model id (used only for API-fetched lists, which carry no prices).
+const LIGHT_W=new Set(['mini','nano','lite','flash','small','tiny','micro']);
+const HIGH_W=new Set(['pro','large','ultra','max','opus']);
+function tierGuess(id){const tk=String(id).toLowerCase().split(/[^a-z0-9]+/);if(tk.some(x=>LIGHT_W.has(x)))return TIER.light;if(tk.some(x=>HIGH_W.has(x)))return TIER.high;return TIER.standard;}
+function mkFetched(id,name,prov,descTxt,ctx){const g=tierGuess(id);return{id,provider:prov,prov,name,inP:g.inP,outP:g.outP,ctx:ctx||g.ctx,speed:g.speed,quality:g.quality,qual:g.quality,embed:'—',tags:[PROV_META[prov]?.name||prov,'LIVE'],desc:{ja:descTxt||'',en:descTxt||''},fetched:true,est:true};}
+
 function calcGrade(inP,outP){if(inP===0)return'S';const c=inP*0.7+outP*0.3;if(c<0.5)return'S';if(c<3)return'A';if(c<8)return'B';if(c<20)return'C';return'D';}
+function gradeOf(m){return calcGrade(m.inP??0,m.outP??0);}
+function loc(v){return v&&typeof v==='object'&&!Array.isArray(v)?(v[lang]||v.en||v.ja||''):(v||'');}
+function nm(m){return loc(m.name);}
+function sn(m){return m.short?loc(m.short):nm(m);}
+function tg(m){return Array.isArray(m.tags)?m.tags:(m.tags&&m.tags[lang])||(m.tags&&m.tags.en)||[];}
+function fmtCtx(n){return n>=1e6?(+(n/1e6).toFixed(1))+'M':Math.round(n/1000)+'K';}
 
 const FORMATS=[
   {id:'json',name:'JSON',ext:'.json',rec:true,desc:{ja:'AnythingLLM標準',en:'AnythingLLM native'},compat:['AnythingLLM','LangChain','LlamaIndex','ChromaDB']},
@@ -718,8 +770,12 @@ let customModels=[];
 let apiKeys={};
 let privMode=false;
 let curProv='all';
-let cmpModels=[];      // ids in comparison (max 4)
-let genModelId=null;   // active model for generation
+let cmpModels=[...DEFAULT_CMP]; // ids in comparison (max 4)
+let genModelId=null;   // optional reference profile (cost basis + recorded in metadata)
+let overrides={};      // user-edited values for non-custom profiles, keyed by id
+let editId=null;
+let ghOptIn=false;
+let ghState={st:'idle',n:0,upd:''};
 let chunks=[];
 let selFmt='json';
 
@@ -728,7 +784,7 @@ function allModels(){
   const jsonFiltered=jsonModels.filter(m=>!sIds.has(m.id));
   const fetchedFlat=Object.values(fetchedModels).flat().filter(m=>!sIds.has(m.id)&&!jsonFiltered.find(j=>j.id===m.id));
   const ollamaFiltered=ollamaModels.filter(m=>!sIds.has(m.id));
-  return[...builtinModels,...jsonFiltered,...fetchedFlat,...ollamaFiltered,...customModels];
+  return[...builtinModels,...jsonFiltered,...fetchedFlat,...ollamaFiltered,...customModels].map(m=>(overrides[m.id]&&!m.custom)?{...m,...overrides[m.id],edited:true}:m);
 }
 function findModel(id){return allModels().find(m=>m.id===id);}
 
@@ -741,12 +797,15 @@ function loadStorage(){
     customModels=JSON.parse(localStorage.getItem('dk_custom_models')||'[]');
     fetchedModels=JSON.parse(localStorage.getItem('dk_fetched_models')||'{}');
     jsonModels=JSON.parse(localStorage.getItem('dk_json_models')||'[]');
-    cmpModels=JSON.parse(localStorage.getItem('dk_cmp_models')||'[]');
+    overrides=JSON.parse(localStorage.getItem('dk_overrides')||'{}');
+    ghOptIn=!!localStorage.getItem('dk_gh_optin');
+    if(!ghOptIn)jsonModels=jsonModels.filter(m=>m._src!=='github'); // v3: the named-model list is opt-in
+    const c=localStorage.getItem('dk_cmp_models');if(c)cmpModels=JSON.parse(c);
     genModelId=localStorage.getItem('dk_gen_model')||null;
     ['openai','google','mistral'].forEach(p=>{const el=document.getElementById('key-'+p);if(el&&apiKeys[p])el.value=apiKeys[p];});
   }catch{}
 }
-function _clearLS(){try{['dk_api_keys','dk_custom_models','dk_fetched_models','dk_json_models','dk_cmp_models','dk_gen_model','dk_priv_ok'].forEach(k=>localStorage.removeItem(k));}catch{}}
+function _clearLS(){try{['dk_api_keys','dk_custom_models','dk_fetched_models','dk_json_models','dk_cmp_models','dk_gen_model','dk_overrides','dk_gh_optin','dk_priv_ok'].forEach(k=>localStorage.removeItem(k));}catch{}}
 function saveKey(p,v){apiKeys[p]=v;if(!privMode)try{localStorage.setItem('dk_api_keys',JSON.stringify(apiKeys));}catch{}}
 function _save(k,v){if(!privMode)try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 
@@ -771,41 +830,57 @@ function confirmClear(){
   _clearLS();
   document.getElementById('txt').value='';
   ['openai','google','mistral'].forEach(p=>{const el=document.getElementById('key-'+p);if(el)el.value='';});
-  customModels=[];fetchedModels={};jsonModels=[];ollamaModels=[];apiKeys={};chunks=[];cmpModels=[];genModelId=null;
+  customModels=[];fetchedModels={};jsonModels=[];ollamaModels=[];apiKeys={};chunks=[];cmpModels=[];genModelId=null;overrides={};ghOptIn=false;ghState={st:'idle',n:0,upd:''};renderGhStatus();
   buildProvTabs();renderModels();renderCmpChips();renderCmpTable();updateAll();
   const btn=document.getElementById('gen-btn');if(btn){btn.textContent=t('clear_done');setTimeout(()=>updateFmtBtn(),2500);}
 }
 window.addEventListener('beforeunload',()=>{if(privMode)_clearLS();});
 
 // ============================================================
-//  LOAD GITHUB MODELS (auto on startup)
+//  LOAD GITHUB MODELS (opt-in; refreshed on startup only after the user has loaded it once)
 // ============================================================
+function renderGhStatus(){
+  const el=document.getElementById('src-github');if(!el)return;
+  el.querySelector('.src-dot').className='src-dot '+ghState.st;
+  el.querySelector('span').textContent=ghState.st==='ok'?t('gh_ok',{n:ghState.n,d:ghState.upd||'—'}):t('gh_'+ghState.st);
+}
+function refreshLists(){
+  buildProvTabs();renderModels();renderCmpChips();renderCmpTable();
+  document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+}
 async function loadGitHubModels(manual=false){
-  const ghSrc=document.getElementById('src-github');
   const st=document.getElementById('json-gh-st');
   const url='https://raw.githubusercontent.com/dkstudio-jp/rag-data-generator/main/models.json';
-  if(ghSrc){ghSrc.querySelector('.src-dot').className='src-dot loading';ghSrc.querySelector('span').textContent='GitHub...';}
+  ghState={st:'loading',n:0,upd:''};renderGhStatus();
   try{
-    const res=await fetch(url);
+    const res=await fetch(url,{cache:'no-store'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     const models=parseJsonModels(data,'github');
-    jsonModels=jsonModels.filter(m=>m._src!=='github');
-    jsonModels=[...jsonModels,...models];
+    jsonModels=[...jsonModels.filter(m=>m._src!=='github'),...models];
+    ghOptIn=true;if(!privMode)try{localStorage.setItem('dk_gh_optin','1');}catch{}
     _save('dk_json_models',jsonModels);
-    if(ghSrc){ghSrc.querySelector('.src-dot').className='src-dot ok';ghSrc.querySelector('span').textContent=`GitHub (${models.length}件)`;}
-    if(st){st.className='json-st ok';st.textContent=`✓ ${models.length}モデル読み込み完了 (${new Date().toLocaleTimeString()})`;}
-    buildProvTabs();renderModels();
-    document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+    ghState={st:'ok',n:models.length,upd:data.updated||''};renderGhStatus();
+    if(st){st.className='json-st ok';st.textContent=`✓ ${models.length}件 読み込み完了（データ更新日: ${data.updated||'不明'}）`;}
+    refreshLists();
   }catch(e){
-    if(ghSrc){ghSrc.querySelector('.src-dot').className='src-dot err';ghSrc.querySelector('span').textContent='GitHub: 未接続';}
+    const cached=jsonModels.filter(m=>m._src==='github');
+    ghState=cached.length?{st:'ok',n:cached.length,upd:cached[0]._upd||''}:{st:'err',n:0,upd:''};renderGhStatus();
     if(st){st.className='json-st err';st.textContent='エラー: '+e.message;}
   }
+}
+function unloadGitHubModels(){
+  jsonModels=jsonModels.filter(m=>m._src!=='github');
+  ghOptIn=false;try{localStorage.removeItem('dk_gh_optin');}catch{}
+  _save('dk_json_models',jsonModels);
+  ghState={st:'idle',n:0,upd:''};renderGhStatus();
+  const st=document.getElementById('json-gh-st');if(st){st.className='json-st ok';st.textContent='✓ 一覧を外しました';}
+  sanitizeSel();updateAll();
 }
 
 function parseJsonModels(data,src){
   const models=data.models||[];
-  return models.map(m=>({...m,_src:src,source:src})).filter(m=>m.id&&m.name);
+  return models.map(m=>({...m,_src:src,source:src,_upd:data.updated||''})).filter(m=>m.id&&m.name);
 }
 
 async function loadFromUrl(){
@@ -820,9 +895,8 @@ async function loadFromUrl(){
     const models=parseJsonModels(data,'url:'+url);
     jsonModels=[...jsonModels.filter(m=>m._src!==('url:'+url)),...models];
     _save('dk_json_models',jsonModels);
-    st.className='json-st ok';st.textContent=`✓ ${models.length}モデル読み込み完了`;
-    buildProvTabs();renderModels();
-    document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+    st.className='json-st ok';st.textContent=`✓ ${models.length}件 読み込み完了（データ更新日: ${data.updated||'不明'}）`;
+    refreshLists();
   }catch(e){st.className='json-st err';st.textContent='エラー: '+e.message;}
 }
 
@@ -837,9 +911,8 @@ function readJsonFile(file){
       const models=parseJsonModels(data,'file:'+file.name);
       jsonModels=[...jsonModels.filter(m=>m._src!==('file:'+file.name)),...models];
       _save('dk_json_models',jsonModels);
-      st.className='json-st ok';st.textContent=`✓ ${models.length}モデル読み込み完了（${file.name}）`;
-      buildProvTabs();renderModels();
-      document.getElementById('db-status').textContent=t('db_status',{n:allModels().length});
+      st.className='json-st ok';st.textContent=`✓ ${models.length}件 読み込み完了（${file.name} ／ データ更新日: ${data.updated||'不明'}）`;
+      refreshLists();
     }catch(err){st.className='json-st err';st.textContent='JSONパースエラー: '+err.message;}
   };
   reader.readAsText(file);
@@ -860,7 +933,7 @@ function buildProvTabs(){
   el.innerHTML=`<div class="ptab${curProv==='all'?' active':''}" data-p="all" onclick="filterProv('all')">${t('prov_all')} <span style="opacity:.6;font-size:9px;">${all.length}</span></div>`;
   provs.forEach(p=>{
     const cnt=all.filter(m=>(m.provider||m.prov)===p).length;
-    el.innerHTML+=`<div class="ptab${curProv===p?' active':''}" data-p="${p}" onclick="filterProv('${p}')">${PROV_META[p]?.name||p} <span style="opacity:.6;font-size:9px;">${cnt}</span></div>`;
+    el.innerHTML+=`<div class="ptab${curProv===p?' active':''}" data-p="${p}" onclick="filterProv('${p}')">${p==='type'?t('prov_type'):(PROV_META[p]?.name||p)} <span style="opacity:.6;font-size:9px;">${cnt}</span></div>`;
   });
   el.innerHTML+=`<div class="ptab${curProv==='local'?' active':''}" data-p="local" onclick="filterProv('local')">${t('prov_local')}</div>`;
 }
@@ -880,17 +953,21 @@ function renderModels(){
   el.innerHTML=list.map(m=>{
     const prov=m.provider||m.prov;
     const inP=m.inP??0,outP=m.outP??0;
-    const grade=m.grade||calcGrade(inP,outP);
+    const grade=gradeOf(m);
     const price=inP===0?'FREE':'$'+inP+'/M';
-    const desc=typeof m.desc==='object'?(m.desc[lang]||m.desc.en||''):m.desc||'';
+    const desc=loc(m.desc);
     const src=m._src||m.source||'';
+    const isType=m.kind==='type';
     const badges=[
       m.local?'<span class="lc-badge b-local">LOCAL</span>':'',
       m.custom?'<span class="lc-badge b-custom">CUSTOM</span>':'',
       m.fetched?'<span class="lc-badge b-live">LIVE</span>':'',
-      (src&&!m.custom&&!m.fetched&&!m.local&&src!=='builtin')?'<span class="lc-badge b-json">JSON</span>':'',
-    ].join('');
-    const delBtn=(m.custom||m.fetched||(src&&src!=='github'&&src!=='builtin'))?`<button class="del-btn" onclick="event.stopPropagation();delModel('${m.id}')" title="削除">×</button>`:'';
+      (src&&!m.custom&&!m.fetched&&!m.local&&src!=='builtin')?`<span class="lc-badge b-json">JSON${m._upd?' · '+m._upd:''}</span>`:'',
+      m.edited?`<span class="lc-badge b-edit">${t('lbl_edit')}</span>`:((isType||m.est)?`<span class="lc-badge b-est">${t('lbl_est')}</span>`:''),
+    ].filter(Boolean).join(' ');
+    const delBtn=(m.edited?`<button class="del-btn" onclick="event.stopPropagation();resetOv('${m.id}')" title="${t('tip_reset')}">↺</button>`:'')
+      +((m.custom||m.fetched||(src&&src!=='github'&&src!=='builtin'))?`<button class="del-btn" onclick="event.stopPropagation();delModel('${m.id}')" title="${t('tip_del')}">×</button>`:'');
+    const subL=(isType?'':(PROV_META[prov]?.name||prov)+' · ')+price+(m.ctx?' · '+fmtCtx(m.ctx)+' ctx':'');
     const cmpClass=isGen(m.id)?'active-gen':inCmp(m.id)?'in-cmp':'';
     const cmpBtnLabel=inCmp(m.id)?t('btn_in_cmp'):t('btn_add_cmp');
     const cmpBtnClass=inCmp(m.id)?'add-cmp-btn active':'add-cmp-btn';
@@ -899,8 +976,8 @@ function renderModels(){
     return `<div class="llm-card ${cmpClass}" id="lc-${m.id}">
       <div class="lc-top">
         <div style="flex:1;min-width:0;">
-          <div class="lc-name">${m.name}</div>
-          <div class="lc-sub">${PROV_META[prov]?.name||prov} · ${price}</div>${badges}
+          <div class="lc-name">${nm(m)}</div>
+          <div class="lc-sub">${subL}</div>${badges}
         </div>
         <div style="display:flex;align-items:flex-start;gap:4px;">
           <div class="grade ${grade}" style="color:${gc[grade]||gc.B};">${grade}</div>${delBtn}
@@ -909,13 +986,15 @@ function renderModels(){
       <div class="meter"><div class="ml">${t('m_cost')}</div><div class="mt"><div class="mf" style="width:${inP===0?100:Math.max(4,100-inP/10*85)}%;background:var(--dk-gold);"></div></div><div class="mv">${inP===0?'FREE':'$'+inP}</div></div>
       <div class="meter"><div class="ml">${t('m_speed')}</div><div class="mt"><div class="mf" style="width:${m.speed||75}%;background:var(--dk-accent);"></div></div><div class="mv">${m.speed||75}</div></div>
       <div class="meter"><div class="ml">${t('m_qual')}</div><div class="mt"><div class="mf" style="width:${m.quality||m.qual||75}%;background:var(--dk-main);"></div></div><div class="mv">${m.quality||m.qual||75}</div></div>
-      <div class="lc-tags">${(m.tags||[]).map(tg=>`<span class="tag">${tg}</span>`).join('')}</div>
+      ${isType&&desc?`<div class="lc-desc">${desc}</div>`:''}
+      <div class="lc-tags">${tg(m).map(x=>`<span class="tag">${x}</span>`).join('')}</div>
       <div class="lc-actions">
         <button class="${cmpBtnClass}" onclick="toggleCmp('${m.id}')">${cmpBtnLabel}</button>
         <button class="${genBtnClass}" onclick="setGenModel('${m.id}')">${genBtnLabel}</button>
+        <button class="edit-btn" onclick="openEdit('${m.id}')" title="${t('tip_edit')}">✎</button>
       </div>
     </div>`;
-  }).join('')||`<div class="empty-state">${lang==='ja'?'モデルがありません':'No models'}</div>`;
+  }).join('')||`<div class="empty-state">${t('lbl_none')}</div>`;
 }
 
 function toggleCmp(id){
@@ -925,11 +1004,20 @@ function toggleCmp(id){
   renderModels();renderCmpChips();renderCmpTable();updateAll();
 }
 function setGenModel(id){
-  genModelId=id;
-  if(!cmpModels.includes(id)&&cmpModels.length<4)cmpModels.push(id);
-  try{localStorage.setItem('dk_gen_model',id);}catch{}
+  if(genModelId===id){genModelId=null;}   // click again to clear — a reference profile is optional
+  else{genModelId=id;if(!cmpModels.includes(id)&&cmpModels.length<4)cmpModels.push(id);}
+  if(!privMode)try{genModelId?localStorage.setItem('dk_gen_model',genModelId):localStorage.removeItem('dk_gen_model');}catch{}
   _save('dk_cmp_models',cmpModels);
   renderModels();renderCmpChips();renderCmpTable();updateAll();
+}
+// Drop selections whose profile no longer exists (e.g. ids saved by v2, or an unloaded list).
+function sanitizeSel(){
+  const before=cmpModels.length;
+  cmpModels=cmpModels.filter(id=>findModel(id));
+  if(before>0&&cmpModels.length===0)cmpModels=[...DEFAULT_CMP];
+  if(genModelId&&!findModel(genModelId)){genModelId=null;try{localStorage.removeItem('dk_gen_model');}catch{}}
+  _save('dk_cmp_models',cmpModels);
+  refreshLists();
 }
 function delModel(id){
   customModels=customModels.filter(m=>m.id!==id);
@@ -937,6 +1025,7 @@ function delModel(id){
   Object.keys(fetchedModels).forEach(p=>{fetchedModels[p]=fetchedModels[p].filter(m=>m.id!==id);});
   cmpModels=cmpModels.filter(x=>x!==id);
   if(genModelId===id)genModelId=null;
+  delete overrides[id];_save('dk_overrides',overrides);
   _save('dk_custom_models',customModels);_save('dk_json_models',jsonModels);_save('dk_fetched_models',fetchedModels);_save('dk_cmp_models',cmpModels);
   buildProvTabs();renderModels();renderCmpChips();renderCmpTable();updateAll();
 }
@@ -951,7 +1040,7 @@ function renderCmpChips(){
     const m=findModel(id);if(!m)return'';
     const isActive=genModelId===id;
     return`<div class="cmp-chip${isActive?' active-gen':''}" onclick="setGenModel('${id}')">
-      ${m.name.split(' ').slice(-1)[0]}
+      ${m.short?sn(m):nm(m).split(' ').slice(-1)[0]}
       <span class="cmp-chip-x" onclick="event.stopPropagation();toggleCmp('${id}')">×</span>
     </div>`;
   }).join('');
@@ -964,26 +1053,31 @@ function renderCmpTable(){
   const el=document.getElementById('cmp-model-cols');
   if(cmpModels.length===0){el.innerHTML=`<div class="empty-state">${t('cmp_table_empty')}</div>`;return;}
   const toks=Math.round((document.getElementById('txt')?.value||'').length/3);
+  const need=Math.round((+document.getElementById('sl-tk').value)*(+document.getElementById('sl-cs').value)/3); // tokens the retrieved chunks occupy
   const models=cmpModels.map(id=>findModel(id)).filter(Boolean);
+  if(models.length===0){el.innerHTML=`<div class="empty-state">${t('cmp_table_empty')}</div>`;return;}
   const costs=models.map(m=>{const inP=m.inP??0;return inP===0?0:(toks/1e6)*inP;});
   const maxCost=Math.max(...costs,0.000001);
-  el.style.gridTemplateColumns=`repeat(${models.length},1fr)`;
+  el.style.gridTemplateColumns=`repeat(${models.length>3?2:models.length},minmax(0,1fr))`;   // 4 profiles → 2×2 so names stay readable
   el.innerHTML=models.map((m,i)=>{
     const inP=m.inP??0,outP=m.outP??0;
-    const grade=m.grade||calcGrade(inP,outP);
+    const grade=gradeOf(m);
     const gc={S:'var(--s-green)',A:'var(--a-green)',B:'var(--b-amber)',C:'var(--c-orange)',D:'var(--d-red)'}[grade]||'var(--b-amber)';
     const cost=costs[i];
     const pct=maxCost>0?(cost/maxCost)*100:0;
     const isActive=genModelId===m.id;
     const costStr=inP===0?'FREE':cost<0.00001?'<$0.00001':'$'+cost.toFixed(5);
+    let ctxLine='';
+    if(m.ctx){const p=need/m.ctx*100;ctxLine=`<div class="cmc-ctx${p>50?' warn':''}" title="${t('ctx_tip',{need:need.toLocaleString(),ctx:m.ctx.toLocaleString()})}">${p>50?'⚠ ':''}${t('ctx_use',{p:p<1?'<1':Math.round(p)})}</div>`;}
     return`<div class="cmp-model-col${isActive?' active':''}" onclick="setGenModel('${m.id}')">
       <div class="cmc-top">
-        <div class="cmc-name">${m.name.replace(/claude\s/i,'').replace(/gemini\s/i,'G ').replace(/gpt-/i,'GPT-')}</div>
+        <div class="cmc-name">${sn(m)}</div>
         <div class="cmc-grade grade ${grade}" style="color:${gc};">${grade}</div>
       </div>
       <div class="cmc-cost">${costStr}</div>
       <div class="cmc-bar-wrap"><div class="cmc-bar" style="width:${pct.toFixed(1)}%;background:${gc};"></div></div>
       <div class="cmc-label"><span>${inP===0?'FREE':'$'+inP+'/M'}</span>${isActive?'<span style="color:var(--dk-gold);">▶</span>':''}</div>
+      ${ctxLine}
     </div>`;
   }).join('');
 }
@@ -996,31 +1090,93 @@ async function detectOllama(){
     const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),3000);
     const res=await fetch('http://localhost:11434/api/tags',{signal:ctrl.signal});
     const data=await res.json();const models=data.models||[];
-    ollamaModels=models.map(m=>({id:'ollama-'+m.name.replace(/[^a-z0-9]/gi,'-'),provider:'ollama',prov:'ollama',name:m.name,grade:'S',inP:0,outP:0,speed:80,quality:75,qual:75,embed:'nomic-embed-text',tags:['Local','Ollama'],desc:{ja:`Ollama: ${m.name}`,en:`Ollama: ${m.name}`},local:true}));
+    ollamaModels=models.map(m=>({id:'ollama-'+m.name.replace(/[^a-z0-9]/gi,'-'),provider:'ollama',prov:'ollama',name:m.name,inP:0,outP:0,speed:80,quality:75,qual:75,embed:'—',tags:['Local','Ollama'],desc:{ja:`Ollama: ${m.name}`,en:`Ollama: ${m.name}`},local:true}));
     const srcBar=document.getElementById('src-bar');
     if(srcBar&&models.length>0){const d=document.createElement('div');d.className='src-item';d.innerHTML=`<div class="src-dot ok"></div><span>Ollama (${models.length})</span>`;srcBar.appendChild(d);}
     buildProvTabs();renderModels();
   }catch{}
+  sanitizeSel();updateAll();
 }
 
 // ============================================================
 //  CLOUD FETCH
 // ============================================================
 function setSt(p,msg,cls=''){const el=document.getElementById('status-'+p);if(el){el.textContent=msg;el.className='upd-st '+cls;}}
-async function fetchOpenAI(){const key=document.getElementById('key-openai').value.trim();if(!key){setSt('openai','APIキーを入力してください','err');return;}setSt('openai','取得中...','loading');try{const res=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});const data=await res.json();if(data.error){setSt('openai','Error: '+data.error.message,'err');return;}const models=(data.data||[]).filter(m=>m.id.match(/^(gpt-|o[0-9])/)).sort((a,b)=>b.created-a.created).map(m=>{const pr=lkP(m.id)||{inP:2.50,outP:10.0};return{id:m.id,provider:'openai',prov:'openai',name:m.id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:75,quality:lkQ(m.id),qual:lkQ(m.id),embed:'text-embedding-3-small',tags:['OpenAI','LIVE'],desc:{ja:'',en:''},fetched:true};});fetchedModels.openai=models;_save('dk_fetched_models',fetchedModels);setSt('openai',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');buildProvTabs();renderModels();}catch(e){setSt('openai','エラー: '+e.message,'err');}}
-async function fetchGoogle(){const key=document.getElementById('key-google').value.trim();if(!key){setSt('google','APIキーを入力してください','err');return;}setSt('google','取得中...','loading');try{const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);const data=await res.json();if(data.error){setSt('google','Error: '+data.error.message,'err');return;}const models=(data.models||[]).filter(m=>m.name.includes('gemini')).map(m=>{const id=m.name.replace('models/','');const pr=lkP(id)||{inP:0.30,outP:2.50};return{id,provider:'google',prov:'google',name:m.displayName||id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:85,quality:lkQ(id),qual:lkQ(id),embed:'text-embedding-004',tags:['Google','LIVE'],desc:{ja:m.description||'',en:m.description||''},fetched:true};});fetchedModels.google=models;_save('dk_fetched_models',fetchedModels);setSt('google',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');buildProvTabs();renderModels();}catch(e){setSt('google','エラー: '+e.message,'err');}}
-async function fetchMistral(){const key=document.getElementById('key-mistral').value.trim();if(!key){setSt('mistral','APIキーを入力してください','err');return;}setSt('mistral','取得中...','loading');try{const res=await fetch('https://api.mistral.ai/v1/models',{headers:{'Authorization':'Bearer '+key}});const data=await res.json();if(!data.data){setSt('mistral','CORS制限の可能性','err');return;}const models=data.data.map(m=>{const pr=lkP(m.id)||{inP:0.20,outP:0.60};return{id:m.id,provider:'mistral',prov:'mistral',name:m.id,grade:calcGrade(pr.inP,pr.outP),inP:pr.inP,outP:pr.outP,speed:80,quality:lkQ(m.id),qual:lkQ(m.id),embed:'mistral-embed',tags:['Mistral','LIVE'],desc:{ja:'',en:''},fetched:true};});fetchedModels.mistral=models;_save('dk_fetched_models',fetchedModels);setSt('mistral',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`, 'ok');buildProvTabs();renderModels();}catch(e){setSt('mistral','エラー (CORS): '+e.message,'err');}}
+const NON_CHAT=/(embed|whisper|tts|dall|image|audio|moderation|realtime|transcribe|search|sora|babbage|davinci)/i;
+async function fetchOpenAI(){
+  const key=document.getElementById('key-openai').value.trim();if(!key){setSt('openai','APIキーを入力してください','err');return;}
+  setSt('openai','取得中...','loading');
+  try{
+    const res=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});const data=await res.json();
+    if(data.error){setSt('openai','Error: '+data.error.message,'err');return;}
+    const models=(data.data||[]).filter(m=>!NON_CHAT.test(m.id)).sort((a,b)=>b.created-a.created).map(m=>mkFetched(m.id,m.id,'openai',''));
+    fetchedModels.openai=models;_save('dk_fetched_models',fetchedModels);setSt('openai',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`,'ok');refreshLists();
+  }catch(e){setSt('openai','エラー: '+e.message,'err');}
+}
+async function fetchGoogle(){
+  const key=document.getElementById('key-google').value.trim();if(!key){setSt('google','APIキーを入力してください','err');return;}
+  setSt('google','取得中...','loading');
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);const data=await res.json();
+    if(data.error){setSt('google','Error: '+data.error.message,'err');return;}
+    const models=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')&&!NON_CHAT.test(m.name)).map(m=>{const id=m.name.replace('models/','');return mkFetched(id,m.displayName||id,'google',m.description||'',m.inputTokenLimit);});
+    fetchedModels.google=models;_save('dk_fetched_models',fetchedModels);setSt('google',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`,'ok');refreshLists();
+  }catch(e){setSt('google','エラー: '+e.message,'err');}
+}
+async function fetchMistral(){
+  const key=document.getElementById('key-mistral').value.trim();if(!key){setSt('mistral','APIキーを入力してください','err');return;}
+  setSt('mistral','取得中...','loading');
+  try{
+    const res=await fetch('https://api.mistral.ai/v1/models',{headers:{'Authorization':'Bearer '+key}});const data=await res.json();
+    if(!data.data){setSt('mistral','CORS制限の可能性','err');return;}
+    const models=data.data.filter(m=>!NON_CHAT.test(m.id)).map(m=>mkFetched(m.id,m.id,'mistral','',m.max_context_length));
+    fetchedModels.mistral=models;_save('dk_fetched_models',fetchedModels);setSt('mistral',`✓ ${models.length} models (${new Date().toLocaleTimeString()})`,'ok');refreshLists();
+  }catch(e){setSt('mistral','エラー (CORS): '+e.message,'err');}
+}
 async function fetchAll(){await fetchOpenAI();await fetchGoogle();await fetchMistral();}
 
 // ============================================================
 //  CUSTOM MODEL
 // ============================================================
+function setAddForm(m){
+  const $=x=>document.getElementById(x);
+  const lock=!!m&&!m.custom;   // non-custom profiles: only the numbers are editable
+  $('add-title').textContent=t(m?'edit_title':'add_title');
+  $('add-save').textContent=t(m?'edit_save':'add_save');
+  const prov=m?(m.provider||m.prov):'custom';
+  $('f-name').value=m?nm(m):'';
+  $('f-prov').value=[...$('f-prov').options].some(o=>o.value===prov)?prov:'custom';
+  $('f-embed').value=m&&m.embed&&m.embed!=='—'&&m.embed!=='any'?m.embed:'';
+  $('f-inp').value=m?(m.inP??0):1;
+  $('f-out').value=m?(m.outP??0):3;
+  $('f-ctx').value=m?(m.ctx??''):128000;
+  $('f-speed').value=m?(m.speed??75):75;$('sp-s').textContent=$('f-speed').value;
+  $('f-qual').value=m?(m.quality??m.qual??80):80;$('sp-q').textContent=$('f-qual').value;
+  $('f-tags').value=m?tg(m).join(', '):'';
+  $('f-desc').value=m?loc(m.desc):'';
+  $('f-local').value=m&&m.local?'1':'';
+  ['f-name','f-prov','f-tags','f-desc','f-local'].forEach(id=>{$(id).disabled=lock;});
+}
+function openAdd(){editId=null;setAddForm(null);openModal('add-overlay');}
+function openEdit(id){const m=findModel(id);if(!m)return;editId=id;setAddForm(m);openModal('add-overlay');}
+function resetOv(id){delete overrides[id];_save('dk_overrides',overrides);refreshLists();updateAll();}
 function addCustom(){
-  const name=document.getElementById('f-name').value.trim();if(!name){alert('モデル名を入力してください');return;}
-  const inP=parseFloat(document.getElementById('f-inp').value)||0;
-  const outP=parseFloat(document.getElementById('f-out').value)||0;
-  customModels.push({id:'custom-'+Date.now(),provider:document.getElementById('f-prov').value,prov:document.getElementById('f-prov').value,name,grade:calcGrade(inP,outP),inP,outP,speed:+document.getElementById('f-speed').value,quality:+document.getElementById('f-qual').value,qual:+document.getElementById('f-qual').value,embed:document.getElementById('f-embed').value||'—',tags:document.getElementById('f-tags').value.split(',').map(s=>s.trim()).filter(Boolean),desc:{ja:document.getElementById('f-desc').value,en:document.getElementById('f-desc').value},local:!!document.getElementById('f-local').value,custom:true});
-  _save('dk_custom_models',customModels);closeModal('add-overlay');buildProvTabs();renderModels();
+  const $=x=>document.getElementById(x);
+  const inP=parseFloat($('f-inp').value)||0,outP=parseFloat($('f-out').value)||0;
+  const ctx=parseInt($('f-ctx').value,10)||null;
+  const speed=+$('f-speed').value,quality=+$('f-qual').value;
+  const cur=editId?findModel(editId):null;
+  if(cur&&!cur.custom){
+    overrides[editId]={inP,outP,ctx,speed,quality,qual:quality,embed:$('f-embed').value.trim()||cur.embed};
+    _save('dk_overrides',overrides);
+  }else{
+    const name=$('f-name').value.trim();if(!name){alert('名前を入力してください');return;}
+    const rec={provider:$('f-prov').value,prov:$('f-prov').value,name,inP,outP,ctx,speed,quality,qual:quality,embed:$('f-embed').value.trim()||'—',tags:$('f-tags').value.split(',').map(s=>s.trim()).filter(Boolean),desc:{ja:$('f-desc').value,en:$('f-desc').value},local:!!$('f-local').value,custom:true};
+    const tgt=cur?customModels.find(x=>x.id===editId):null;
+    if(tgt)Object.assign(tgt,rec);else customModels.push({id:'custom-'+Date.now(),...rec});
+    _save('dk_custom_models',customModels);
+  }
+  editId=null;closeModal('add-overlay');refreshLists();updateAll();
 }
 
 // ============================================================
@@ -1058,7 +1214,7 @@ function updateAll(){
   else document.getElementById('s-cost').textContent='—';
   renderCmpTable();
   updateCopas();renderChunkPreview();
-  document.getElementById('gen-btn').disabled=!(chunks.length>0&&genModelId);
+  document.getElementById('gen-btn').disabled=!(chunks.length>0);   // no model choice required — chunks are model-independent
 }
 
 function updateCopas(){}  // merged into cmp table
@@ -1089,11 +1245,11 @@ function updateFmtBtn(){
 //  GENERATE
 // ============================================================
 function doGenerate(){
-  if(!chunks.length||!genModelId)return;
-  const m=findModel(genModelId);if(!m)return;
+  if(!chunks.length)return;
+  const m=genModelId?findModel(genModelId):null;   // optional reference profile
   const size=+document.getElementById('sl-cs').value,ovlp=+document.getElementById('sl-ov').value,topk=+document.getElementById('sl-tk').value;
   const text=document.getElementById('txt').value,toks=Math.round(text.length/3);
-  const meta={generator:'dkstudio RAG Data Generator v2.0.0',copyright:'© dkstudio (dkstudio.jp) — MIT License',purpose:'For Personal AI OS',generated_at:new Date().toISOString(),model:m.id,model_name:m.name,provider:m.provider||m.prov,embed_model:m.embed,copas_grade:m.grade||calcGrade(m.inP??0,m.outP??0),settings:{chunk_size:size,overlap:ovlp,top_k:topk},stats:{total_chars:text.length,total_tokens_est:toks,total_chunks:chunks.length}};
+  const meta={generator:'dkstudio RAG Data Generator v3.0.0',copyright:'© dkstudio (dkstudio.jp) — MIT License',purpose:'For Personal AI OS',generated_at:new Date().toISOString(),model:m?m.id:'any',model_name:m?nm(m):t('m_any'),provider:m?(m.provider||m.prov):'any',profile_kind:m?(m.kind||'model'):'none',context_window:m?(m.ctx??null):null,embed_model:m?(m.embed||'any'):'any',copas_grade:m?gradeOf(m):'-',settings:{chunk_size:size,overlap:ovlp,top_k:topk},stats:{total_chars:text.length,total_tokens_est:toks,total_chunks:chunks.length}};
   ({json:gJSON,jsonl:gJSONL,md:gMD,txt:gTXT,csv:gCSV,xlsx:gXLSX,xml:gXML,yaml:gYAML})[selFmt](meta);
 }
 function dl(c,f,tp){const b=new Blob([c],{type:tp}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=f;a.click();URL.revokeObjectURL(u);}
@@ -1114,18 +1270,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
   loadStorage();
   checkFirstVisit();
 
-  // Load builtin from models.json if available, else use embedded
-  builtinModels=[
-    {id:'claude-opus-4-7',provider:'anthropic',prov:'anthropic',name:'Claude Opus 4.7',grade:'B',inP:5.00,outP:25.0,speed:58,quality:99,qual:99,embed:'Voyage AI',tags:['Best Quality','Complex'],desc:{ja:'品質最優先。高付加価値コンテンツ向け。',en:'Top quality. For high-value content.'},_src:'builtin'},
-    {id:'claude-sonnet-4-6',provider:'anthropic',prov:'anthropic',name:'Claude Sonnet 4.6',grade:'B',inP:3.00,outP:15.0,speed:74,quality:92,qual:92,embed:'Voyage AI',tags:['Balanced','Production'],desc:{ja:'品質×コストのベスト。本番の定番。',en:'Best quality-cost balance.'},_src:'builtin'},
-    {id:'claude-haiku-4-5',provider:'anthropic',prov:'anthropic',name:'Claude Haiku 4.5',grade:'A',inP:1.00,outP:5.00,speed:88,quality:82,qual:82,embed:'Voyage AI',tags:['Fast','Affordable'],desc:{ja:'Claude系最安。日本語に強い。',en:'Most affordable Claude.'},_src:'builtin'},
-    {id:'gpt-4o',provider:'openai',prov:'openai',name:'GPT-4o',grade:'B',inP:2.50,outP:10.0,speed:73,quality:91,qual:91,embed:'text-emb-3-large',tags:['High Performance','Versatile'],desc:{ja:'GPT系最高峰。',en:'Top GPT model.'},_src:'builtin'},
-    {id:'gpt-4o-mini',provider:'openai',prov:'openai',name:'GPT-4o mini',grade:'S',inP:0.15,outP:0.60,speed:91,quality:78,qual:78,embed:'text-emb-3-small',tags:['Best Value','High Volume'],desc:{ja:'OpenAI最安。大量処理向け。',en:'OpenAI most affordable.'},_src:'builtin'},
-    {id:'gemini-2-5-flash',provider:'google',prov:'google',name:'Gemini 2.5 Flash',grade:'A',inP:0.30,outP:2.50,speed:86,quality:85,qual:85,embed:'text-embedding-004',tags:['Balanced','Fast'],desc:{ja:'速度と品質のバランス。',en:'Speed and quality balance.'},_src:'builtin'},
-    {id:'gemini-flash-lite',provider:'google',prov:'google',name:'Gemini Flash-Lite',grade:'S',inP:0.10,outP:0.40,speed:96,quality:72,qual:72,embed:'text-embedding-004',tags:['Cheapest','Ultra Fast'],desc:{ja:'最安値。常時稼働に。',en:'Lowest cost.'},_src:'builtin'},
-    {id:'mistral-small',provider:'mistral',prov:'mistral',name:'Mistral Small',grade:'A',inP:0.20,outP:0.60,speed:86,quality:75,qual:75,embed:'mistral-embed',tags:['Affordable','EU'],desc:{ja:'Mistral系最安。',en:'Most affordable Mistral.'},_src:'builtin'},
-    {id:'llama3-3-70b',provider:'meta',prov:'meta',name:'Llama 3.3 70B',grade:'S',inP:0,outP:0,speed:75,quality:84,qual:84,embed:'nomic-embed-text',tags:['Free','Open Source'],desc:{ja:'Meta製最高峰。Ollama経由で利用可能。',en:"Meta's best. Via Ollama."},local:true,_src:'builtin'},
-  ];
+  // Built-in profiles are model-agnostic types (no vendor model names are hard-coded)
+  builtinModels=BUILTIN_TYPES;
 
   applyI18n();
   renderFormats();
@@ -1136,8 +1282,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('txt').addEventListener('input',updateAll);
   updateAll();
 
-  // Auto-load GitHub models
-  loadGitHubModels(false);
+  // The named-model list on GitHub is opt-in; refresh it only if the user loaded it before
+  if(ghOptIn)loadGitHubModels(false);else renderGhStatus();
   // Auto-detect Ollama
   detectOllama();
 });
